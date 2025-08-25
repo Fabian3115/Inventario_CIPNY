@@ -1,278 +1,277 @@
-/* ==========================================
-   Registrar Entrada – Estilo independiente
-   Scope: .entry-form (no rompe otras vistas)
-   ========================================== */
-.entry-form {
-  --ef-blue: var(--ny-blue-700, #004aad);
-  --ef-blue-600: var(--ny-blue-600, #0a5bca);
-  --ef-blue-100: var(--ny-blue-100, #e8f0fe);
-  --ef-red: var(--ny-red-500, #d72638);
-  --ef-red-600: var(--ny-red-600, #c31f2d);
-  --ef-black: var(--ny-gray-700, #111);
-  --ef-gray-500: var(--ny-gray-500, #555);
-  --ef-shadow-sm: 0 4px 14px rgba(0,0,0,.06);
-  --ef-shadow-md: 0 10px 26px rgba(0,0,0,.08);
+/* =========================================================
+   Movimientos – Estilo independiente (scope: .entry-form)
+   No afecta otras vistas fuera de .entry-form
+   ========================================================= */
+.entry-form{
+  /* Tokens locales (heredan de master si existen) */
+  --ef-blue:        var(--ny-blue-700, #004aad);
+  --ef-blue-600:    var(--ny-blue-600, #0a5bca);
+  --ef-blue-100:    var(--ny-blue-100, #e8f0fe);
+  --ef-red:         #d72638;
+  --ef-red-600:     #c31f2d;
+  --ef-black:       var(--ny-gray-700, #111);
+  --ef-gray-500:    var(--ny-gray-500, #555);
+  --ef-shadow-sm:   0 6px 18px rgba(0,0,0,.10);
+  --ef-shadow-md:   0 12px 28px rgba(0,0,0,.14);
+  --ef-glass-bg:    rgba(255,255,255,.22);   /* paneles */
+  --ef-glass-brd:   rgba(255,255,255,.32);
+  --ef-glass-ctrl:  rgba(255,255,255,.78);   /* inputs */
+  --ef-glass-ctrl2: rgba(255,255,255,.86);
 }
 
-/* Header + breadcrumb */
-.entry-form .breadcrumb .breadcrumb-item a { color: var(--ef-blue); text-decoration: none; }
-.entry-form .breadcrumb .breadcrumb-item a:hover { text-decoration: underline; }
+/* Migas */
+.entry-form .breadcrumb .breadcrumb-item a{
+  color: var(--ef-blue); text-decoration: none;
+}
+.entry-form .breadcrumb .breadcrumb-item a:hover{
+  text-decoration: underline;
+}
 
-/* ==== Cards ==== */
+/* =========================================================
+   PANELES GLASS (aplica a tus DIVs principales)
+   ========================================================= */
 .entry-form .entry-card,
-.entry-form .tips-card {
-  border: 1px solid #edf0f4;
+.entry-form .tips-card{
+  background: var(--ef-glass-bg);
+  border: 1px solid var(--ef-glass-brd);
   border-radius: 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: var(--ef-shadow-sm);
   overflow: hidden;
-  transform: translateY(6px);
-  opacity: 0;
-  animation: efCardIn .45s cubic-bezier(.22,.61,.36,1) .05s forwards;
+  opacity: 0; transform: translateY(8px) scale(.995);
+  animation: efCardIn .45s cubic-bezier(.22,.61,.36,1) .04s forwards;
 }
-@keyframes efCardIn { to { transform: translateY(0); opacity: 1; } }
-
-/* Hover sutil en cards */
 .entry-form .entry-card:hover,
-.entry-form .tips-card:hover {
+.entry-form .tips-card:hover{
   transform: translateY(-2px);
   box-shadow: var(--ef-shadow-md);
 }
+@keyframes efCardIn{
+  to{ opacity:1; transform: none; }
+}
 
-/* Header con degradado animado (brand) */
-.entry-form .card-header.brand {
+/* Encabezados de panel */
+.entry-form .card-header.brand{
   background: linear-gradient(100deg, var(--ef-blue), var(--ef-red)) !important;
   background-size: 200% 100%;
   animation: efStripe 6s ease infinite;
-  color:#fff; border:0;
+  color: #fff; border:0;
 }
-@keyframes efStripe {
-  0%,100% { background-position: 0% 0; }
-  50%     { background-position: 100% 0; }
-}
-
-/* Header tips */
-.entry-form .card-header.tips {
+.entry-form .card-header.tips{
   background: linear-gradient(90deg, var(--ef-blue), var(--ef-red-600));
   color:#fff; border:0;
 }
-
-/* ==== Campos y grupos ==== */
-.entry-form .form-label { font-weight: 700; color: var(--ef-black); }
-
-.entry-form .input-group-text {
-  background: #fff; border-color: #e6ebf2; color: var(--ef-blue);
-  transition: color .2s ease, transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-  position: relative; overflow: hidden;
+/* redondeo superior consistente cuando hay header */
+.entry-form .card-header.brand,
+.entry-form .card-header.tips{
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
 }
+
+@keyframes efStripe{
+  0%,100%{ background-position: 0% 0; }
+  50%    { background-position: 100% 0; }
+}
+
+/* =========================================================
+   CAMPOS / CONTROLES con look “glass”
+   ========================================================= */
+.entry-form .form-label{
+  font-weight: 700; color: var(--ef-black);
+}
+
+/* Fondo translúcido en inputs/selects */
 .entry-form .form-control,
-.entry-form .form-select {
-  border-color: #e6ebf2;
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+.entry-form .form-select{
+  background: var(--ef-glass-ctrl);
+  border: 1px solid rgba(255,255,255,.55);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
 }
-.entry-form .form-control::placeholder { color: #9aa4b2; }
+.entry-form .form-control::placeholder{ color:#9aa4b2; }
 
 .entry-form .form-control:focus,
-.entry-form .form-select:focus {
+.entry-form .form-select:focus{
+  background: var(--ef-glass-ctrl2);
   border-color: var(--ef-blue);
-  box-shadow: 0 0 0 .15rem rgba(0,74,173,.12);
+  box-shadow: 0 0 0 .15rem rgba(10,91,202,.14);
 }
 
-/* Resalta ícono cuando el grupo tiene foco */
-.entry-form .input-group:focus-within .input-group-text {
+/* Icono del input-group con realce al foco */
+.entry-form .input-group-text{
+  background: rgba(255,255,255,.6);
+  border-color: rgba(255,255,255,.55);
+  color: var(--ef-blue);
+  transition: color .2s ease, transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.entry-form .input-group:focus-within .input-group-text{
   color:#fff; background: var(--ef-blue); border-color: var(--ef-blue);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,.08);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
 }
+/* aura suave del grupo */
+.entry-form .input-group:focus-within{ filter: drop-shadow(0 6px 14px rgba(0,0,0,.06)); }
 
-/* Aura al foco (suave) */
-.entry-form .input-group:focus-within {
-  filter: drop-shadow(0 6px 14px rgba(0,0,0,.06));
-}
-
-/* Select hover */
-.entry-form select.form-select:hover { border-color: #d7dde7; }
+/* Hover leve en selects */
+.entry-form select.form-select:hover{ border-color: rgba(0,0,0,.15); }
 
 /* Texto auxiliar (unidad/stock/quedará) */
-.entry-form .form-text { color: var(--ef-gray-500); }
-.entry-form .form-text strong {
-  display: inline-block; padding: .1rem .5rem; border-radius: 999px;
-  background: var(--ef-blue-100); color: var(--ef-black);
-  font-weight: 800; letter-spacing: .2px;
+.entry-form .form-text{ color: var(--ef-gray-500); }
+.entry-form .form-text strong{
+  display:inline-block; padding:.1rem .5rem; border-radius: 999px;
+  background: var(--ef-blue-100); color: var(--ef-black); font-weight: 800; letter-spacing:.2px;
 }
 
-/* Alertas */
-.entry-form .alert-danger {
-  border-radius: 12px; animation: efShake .28s ease-in-out;
+/* Estados de "Quedará" + ping */
+.entry-form .will-ok{  background:#e9f6ff; color:#0b4d6d; }
+.entry-form .will-warn{ background:#fff4e6; color:#7a4b00; }
+.entry-form .ping{
+  animation: efPing .65s ease-out;
 }
-@keyframes efShake {
-  0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); }
-  50% { transform: translateX(3px); } 75% { transform: translateX(-2px); }
-}
-.entry-form .is-invalid { animation: efFieldFlash .6s ease-out; }
-@keyframes efFieldFlash {
-  0% { box-shadow: 0 0 0 .15rem rgba(215,38,56,.18); }
-  100% { box-shadow: none; }
+@keyframes efPing{
+  0%{   box-shadow:0 0 0 0 rgba(10,91,202,.28); transform:scale(1); }
+  80%{  box-shadow:0 0 0 .7rem rgba(10,91,202,0); transform:scale(1.02); }
+  100%{ box-shadow:none; transform:scale(1); }
 }
 
-/* Botones */
-.entry-form .btn-success {
+/* =========================================================
+   ALERTAS
+   ========================================================= */
+.entry-form .alert-danger{
+  border-radius: 12px;
+  background: rgba(255,255,255,.85);
+  border: 1px solid rgba(255,0,0,.12);
+  backdrop-filter: blur(4px);
+  animation: efShake .28s ease-in-out;
+}
+@keyframes efShake{
+  0%,100%{ transform: translateX(0); }
+  25%{ transform: translateX(-4px); }
+  50%{ transform: translateX(3px); }
+  75%{ transform: translateX(-2px); }
+}
+.entry-form .is-invalid{ animation: efFieldFlash .6s ease-out; }
+@keyframes efFieldFlash{
+  0%{ box-shadow: 0 0 0 .15rem rgba(215,38,56,.18); }
+  100%{ box-shadow: none; }
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+.entry-form .btn-success{
   background: var(--ef-blue); border-color: var(--ef-blue);
   border-radius: 12px; font-weight: 700;
   transition: transform .15s ease, box-shadow .2s ease, filter .15s ease;
   position: relative; overflow: hidden;
 }
-.entry-form .btn-success:hover {
+.entry-form .btn-success:hover{
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(0,0,0,.12);
+  box-shadow: 0 10px 24px rgba(0,0,0,.14);
   filter: saturate(1.05);
 }
-/* Shine sweep */
-.entry-form .btn-success::after {
+.entry-form .btn-success::after{
   content:""; position:absolute; inset:0; transform: translateX(-120%) skewX(-20deg);
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
   transition: transform .6s ease;
 }
-.entry-form .btn-success:hover::after { transform: translateX(120%) skewX(-20deg); }
+.entry-form .btn-success:hover::after{ transform: translateX(120%) skewX(-20deg); }
 
-.entry-form .btn-outline-secondary { border-radius: 12px; }
-
-/* Tips */
-.entry-form .tips-card li {
-  padding: .25rem .4rem; border-radius: 8px;
-  transition: background .2s ease, transform .2s ease;
-  position: relative; list-style: none; padding-left: 1.2rem;
-}
-.entry-form .tips-card li::before{
-  content:""; position:absolute; left:.3rem; top:.6rem;
-  width:6px; height:6px; border-radius:999px; background: var(--ef-blue);
-  animation: efDot .9s ease-in-out infinite alternate;
-}
-@keyframes efDot { to { transform: scale(1.35); } }
-.entry-form .tips-card li:hover {
-  background: #f6f9ff; transform: translateX(2px);
-}
-
-/* Aparición escalonada por campo */
-.entry-form .card-body .row.g-3 > [class*="col-"] {
-  opacity: 0; transform: translateY(8px);
-  animation: efStagger .4s ease forwards;
-}
-.entry-form .card-body .row.g-3 > [class*="col-"]:nth-child(1){ animation-delay:.02s; }
-.entry-form .card-body .row.g-3 > [class*="col-"]:nth-child(2){ animation-delay:.06s; }
-.entry-form .card-body .row.g-3 > [class*="col-"]:nth-child(3){ animation-delay:.10s; }
-@keyframes efStagger { to { opacity:1; transform: translateY(0); } }
-
-/* Quedará: estados + ping visual */
-.entry-form .will-ok { background: #e9f6ff; color:#0b4d6d; }
-.entry-form .will-warn { background: #fff4e6; color:#7a4b00; }
-.entry-form .ping {
-  animation: efPing .65s ease-out;
-}
-@keyframes efPing {
-  0%   { box-shadow: 0 0 0 0 rgba(10,91,202,.28); transform: scale(1); }
-  80%  { box-shadow: 0 0 0 .7rem rgba(10,91,202,0); transform: scale(1.02); }
-  100% { box-shadow: none; transform: scale(1); }
-}
-
-/* Ripple reusable */
-.entry-form .ripple-host { position: relative; overflow: hidden; }
-.entry-form .ripple {
-  position:absolute; border-radius:50%;
-  width:10px; height:10px; pointer-events:none; opacity:.6;
-  background: radial-gradient(closest-side, rgba(0,0,0,.18), rgba(0,0,0,0));
-  transform: translate(-50%, -50%) scale(0);
-  animation: efRipple .6s ease-out forwards;
-}
-@keyframes efRipple { to { transform: translate(-50%, -50%) scale(18); opacity: 0; } }
+.entry-form .btn-outline-secondary{ border-radius: 12px; }
 
 /* Accesibilidad */
-.entry-form .btn:focus { outline: 3px solid rgba(47,115,214,.25); outline-offset: 2px; }
+.entry-form .btn:focus{
+  outline: 3px solid rgba(47,115,214,.25); outline-offset: 2px;
+}
+/* ---- Parche mínimo para que Tips ajuste su alto al contenido (Entrada) ---- */
+.entry-form #tipsCol { align-self: flex-start; }
 
-/* Reduce motion */
-@media (prefers-reduced-motion: reduce) {
-  .entry-form * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+.entry-form .tips-card { 
+  height: auto !important;    /* ignora h-100 */
+  min-height: 0 !important;
 }
 
-/* ====== Preservar el look actual del card "Tips" ====== */
-.entry-form .tips-card {
-  border-radius: 16px;                /* esquinas redondeadas */
-  overflow: hidden;
-}
-.entry-form .tips-card .card-header.tips {
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;      /* header redondeado como en tu imagen */
+.entry-form .tips-card .card-body { 
+  padding-top: .9rem; 
+  padding-bottom: .9rem; 
 }
 
-/* Lista con bullets estándar y sangría clásica */
-.entry-form .tips-card ul {
-  list-style: disc;                    /* bullets normales */
-  padding-left: 1.25rem;               /* sangría estándar */
-  margin-left: .25rem;
-}
-.entry-form .tips-card li {
-  position: static;                    /* sin pseudo-icono posicionado */
-  padding-left: 0;                     /* sin padding extra */
-  transform: none !important;          /* sin desplazamiento al hover */
-  background: transparent !important;  /* sin highlight */
+/* Botón "i" (deja su look, sólo ubicación no intrusiva) */
+.entry-form .tips-fab{
+  position: absolute; 
+  right: .75rem; 
+  bottom: .75rem; 
+  top: auto; 
+  margin-left: 0; 
 }
 
-/* Color del bullet (sin cambiar el estilo) */
-.entry-form .tips-card li::before { content: none !important; } /* desactiva el puntico animado */
-.entry-form .tips-card li::marker { color: var(--ef-blue, #004aad); }
 
-/* Opcional: hover MUY sutil (o elimínalo si no lo quieres) */
-.entry-form .tips-card li:hover {
-  background: transparent;
-  transform: none;
-}
-
-/* Efecto SOLO si usas .tips-list */
-.entry-form .tips-card .tips-list { list-style: none; padding-left: 0; }
-.entry-form .tips-card .tips-list li {
+/* =========================================================
+   LISTAS DE TIPS (la que usas: .tips-list)
+   ========================================================= */
+.entry-form .tips-card .tips-list{ list-style:none; padding-left:0; margin:0; }
+.entry-form .tips-card .tips-list li{
   position: relative; padding-left: 1.1rem; border-radius: 8px;
   transition: background .2s ease, transform .2s ease;
 }
-.entry-form .tips-card .tips-list li::before {
+.entry-form .tips-card .tips-list li::before{
   content:""; position:absolute; left:.25rem; top:.6rem;
-  width:6px; height:6px; border-radius:999px; background: var(--ef-blue, #004aad);
+  width:6px; height:6px; border-radius:999px; background: var(--ef-blue);
   animation: efDot .9s ease-in-out infinite alternate;
 }
-@keyframes efDot { to { transform: scale(1.35); } }
-.entry-form .tips-card .tips-list li:hover { background: #f6f9ff; transform: translateX(2px); }
+@keyframes efDot{ to{ transform: scale(1.35); } }
+.entry-form .tips-card .tips-list li:hover{
+  background: rgba(255,255,255,.28); /* mini glass */
+  backdrop-filter: blur(3px);
+  transform: translateX(2px);
+}
 
-/* ===== Expandible Tips: FAB + transiciones ===== */
+/* =========================================================
+   TRANSICIONES DE LAYOUT (abrir/cerrar tips en desktop)
+   ========================================================= */
 .entry-form #tipsCol,
-.entry-form #formCol { transition: all .25s ease; }
+.entry-form #formCol{ transition: all .25s ease; }
 
-/* Botón mini flotante para abrir Tips (solo desktop) */
-.entry-form .tips-fab {
-  position: sticky;       /* se mantiene visible al hacer scroll dentro del row */
-  top: 1rem;
-  align-self: flex-start;
-  margin-left: auto;      /* empuja hacia la derecha */
-  z-index: 3;
-
+/* Botón flotante para reabrir Tips (solo desktop) */
+.entry-form .tips-fab{
+  position: sticky; top: 1rem; align-self: flex-start; margin-left: auto; z-index: 3;
   width: 44px; height: 44px; border-radius: 50%;
   display: grid; place-items: center; border: 0;
   box-shadow: 0 8px 20px rgba(0,0,0,.15);
-  color: #fff;
-  background: linear-gradient(135deg, var(--ef-red,#d72638), var(--ef-blue,#004aad));
+  color:#fff; background: linear-gradient(135deg, var(--ef-red), var(--ef-blue));
 }
-.entry-form .tips-fab:hover { filter: brightness(1.06); }
+.entry-form .tips-fab:hover{ filter: brightness(1.06); }
 
-/* Botón de cerrar dentro del header Tips (estética sutil) */
-.entry-form .tips-close {
-  background: rgba(255,255,255,.15);
-  border: 0; padding: .25rem .5rem; line-height: 1;
-  border-radius: 8px;
+/* Botón cerrar tips */
+.entry-form .tips-close{
+  background: rgba(255,255,255,.15); border:0; padding:.25rem .5rem; line-height:1; border-radius:8px;
 }
-.entry-form .tips-close:hover { background: rgba(255,255,255,.25); }
+.entry-form .tips-close:hover{ background: rgba(255,255,255,.25); }
 
-/* Oculta el FAB en móviles (stack vertical natural) */
-@media (max-width: 991.98px) {
-  .entry-form .tips-fab { display: none !important; }
+/* Oculta el FAB en móviles (stack natural) */
+@media (max-width: 991.98px){
+  .entry-form .tips-fab{ display:none !important; }
+}
+
+/* =========================================================
+   EFECTO RIPPLE (ligero)
+   ========================================================= */
+.entry-form .ripple-host{ position:relative; overflow:hidden; }
+.entry-form .ripple{
+  position:absolute; border-radius:50%; width:10px; height:10px; pointer-events:none; opacity:.6;
+  background: radial-gradient(closest-side, rgba(0,0,0,.18), rgba(0,0,0,0));
+  transform: translate(-50%,-50%) scale(0);
+  animation: efRipple .6s ease-out forwards;
+}
+@keyframes efRipple{ to{ transform: translate(-50%,-50%) scale(18); opacity:0; } }
+
+/* =========================================================
+   REDUCE MOTION
+   ========================================================= */
+@media (prefers-reduced-motion: reduce){
+  .entry-form *{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
 }

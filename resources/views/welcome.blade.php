@@ -2,8 +2,8 @@
 
 @section('content')
     {{-- =========================
-     Hero
-========================== --}}
+         Hero
+    ========================== --}}
     <section class="welcome-hero position-relative overflow-hidden rounded-4 p-0 p-md-5 mb-4 shadow-sm">
         <div class="row align-items-center g-4">
             <div class="col-lg-7">
@@ -11,6 +11,7 @@
                     <span class="badge bg-teal fw-semibold">Inventario</span>
                     <span class="text-white-50 small">C.I. Piscícola New York</span>
                 </div>
+
                 <h2 class="display-6 text-white fw-bold mb-2">Bienvenido al Sistema de Inventario</h2>
                 <p class="lead text-white-50 mb-4">
                     Registra entradas y salidas, administra productos y controla existencias en tiempo real.
@@ -38,13 +39,13 @@
             </div>
 
             <div class="col-lg-5 d-none d-lg-block">
-                {{-- Tarjeta de estado del sistema --}}
+                {{-- Tarjeta de estado del sistema (glass) --}}
                 <div class="card border-0 shadow-lg rounded-4 glassy">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <h5 class="mb-0">Estado del sistema</h5>
                             <span class="badge rounded-pill bg-teal badge-pulse">
-                                <i class="fas fa-water me-1"></i> Operativo
+                                <i class="bi bi-activity me-1"></i> Operativo
                             </span>
                         </div>
                         <ul class="list-unstyled mb-0 small">
@@ -70,8 +71,8 @@
     </section>
 
     {{-- =========================
-     KPIs / Tarjetas rápidas
-========================== --}}
+         KPIs / Tarjetas rápidas
+    ========================== --}}
     <section class="mb-4">
         <div class="row g-3 g-md-4">
             <div class="col-6 col-lg-3">
@@ -123,9 +124,8 @@
             </div>
         </div>
     </section>
-
-
 @endsection
+
 {{-- =========================
      Modal “Stock Bajo / Agotados” fullscreen
 ========================== --}}
@@ -133,7 +133,7 @@
 <div class="modal fade" id="stockAlertModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-fullscreen modal-dialog-centered">
     <div class="modal-content border-0">
-      {{-- Header con gradiente --}}
+      {{-- Header con gradiente azul de la marca (coherente con layout) --}}
       <div class="modal-header border-0" style="background: linear-gradient(120deg, var(--ny-blue-700), var(--ny-blue-500));">
         <div class="w-100 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
           <div class="d-flex align-items-center gap-3">
@@ -146,7 +146,6 @@
               <small class="text-white-50">Se detectaron referencias con stock bajo o agotado</small>
             </div>
           </div>
-
           <div class="mt-3 mt-md-0">
             <span class="badge bg-teal fs-6">
               {{ $out_of_stock->count() }} {{ Str::plural('producto', $out_of_stock->count()) }}
@@ -156,11 +155,10 @@
         <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      {{-- Body --}}
       <div class="modal-body p-3 p-md-4">
         <div class="row g-3">
           <div class="col-12">
-            <div class="alert border-0" style="background: var(--ny-teal-200); color:#0b3b4f;">
+            <div class="alert border-0" style="background:#eaf7fb;color:#0b3b4f;">
               <div class="d-flex flex-wrap align-items-center gap-2">
                 <i class="bi bi-megaphone-fill"></i>
                 <strong>Recomendación:</strong>
@@ -169,7 +167,7 @@
             </div>
           </div>
 
-          {{-- Chips con CÓDIGOS en badges --}}
+          {{-- Chips con códigos --}}
           <div class="col-12">
             <div class="d-flex flex-wrap gap-2">
               @foreach($out_of_stock as $p)
@@ -217,8 +215,7 @@
                   <a href="{{ route('products.index') }}" class="btn btn-outline-primary btn-sm">
                     <i class="bi bi-list-ul me-1"></i> Ver productos
                   </a>
-                  {{-- Reemplaza esta ruta por tu flujo de compras/solicitudes si lo tienes --}}
-                  <a href="#" class="btn btn-secondary-sena btn-sm">
+                  <a href="#" class="btn btn-secondary btn-sm">
                     <i class="bi bi-cart-plus me-1"></i> Generar solicitud de compra
                   </a>
                 </div>
@@ -229,7 +226,6 @@
         </div>
       </div>
 
-      {{-- Footer --}}
       <div class="modal-footer bg-white border-0">
         <button type="button" class="btn btn-light" data-bs-dismiss="modal">
           <i class="bi bi-x-lg me-1"></i> Cerrar
@@ -240,18 +236,25 @@
 </div>
 @endif
 
-
 {{-- =========================
-     Scripts locales (usa las mismas micro-animaciones)
+     Scripts locales
 ========================== --}}
+@push('scripts')
 <script>
-    // Stagger reveal de atajos y KPIs
-    (function revealWelcome() {
-        const cards = document.querySelectorAll('.has-anim');
-        cards.forEach(el => {
-            const d = parseInt(el.getAttribute('data-anim-delay') || '0', 10);
-            setTimeout(() => el.classList.add('is-revealed'), d);
-        });
-    })();
-</script>
+  // Stagger reveal de atajos y KPIs
+  (function revealWelcome() {
+      document.querySelectorAll('.has-anim').forEach(el=>{
+          const d = parseInt(el.getAttribute('data-anim-delay')||'0',10);
+          setTimeout(()=>el.classList.add('is-revealed'), d);
+      });
+  })();
 
+  // Si existen productos con stock bajo, mostrar el modal (si tu layout no lo hace ya)
+  (function autoOpenStockModal(){
+      const modalEl = document.getElementById('stockAlertModal');
+      if(!modalEl) return;
+      const m = new bootstrap.Modal(modalEl, {backdrop:'static', keyboard:true});
+      setTimeout(()=>m.show(), 250);
+  })();
+</script>
+@endpush
