@@ -183,28 +183,6 @@
 .entry-form .btn:focus{
   outline: 3px solid rgba(47,115,214,.25); outline-offset: 2px;
 }
-/* ---- Parche mínimo para que Tips ajuste su alto al contenido (Entrada) ---- */
-.entry-form #tipsCol { align-self: flex-start; }
-
-.entry-form .tips-card { 
-  height: auto !important;    /* ignora h-100 */
-  min-height: 0 !important;
-}
-
-.entry-form .tips-card .card-body { 
-  padding-top: .9rem; 
-  padding-bottom: .9rem; 
-}
-
-/* Botón "i" (deja su look, sólo ubicación no intrusiva) */
-.entry-form .tips-fab{
-  position: absolute; 
-  right: .75rem; 
-  bottom: .75rem; 
-  top: auto; 
-  margin-left: 0; 
-}
-
 
 /* =========================================================
    LISTAS DE TIPS (la que usas: .tips-list)

@@ -35,10 +35,9 @@
             </div>
 
             <div class="ms-auto d-none d-md-flex align-items-center gap-3">
-                <span class="text-white-75 small"><i class="bi bi-water me-1"></i> Calidad garantizada</span>
-                <span class="badge rounded-pill bg-light-subtle text-black border border-white/25">
-                    <i class="bi bi-activity me-1"></i> Operativo
-                </span>
+                <a href="https://piscicolanewyork.com/" target="_blank" rel="noopener noreferrer" class="btn-glass">
+                    <i class="bi bi-info-circle me-1"></i> Sobre nosotros
+                </a>
             </div>
         </div>
     </header>
@@ -118,7 +117,7 @@
     <footer class="ny-footer">
         <div class="container-xxl py-2">
             <div class="row g-2 align-items-center">
-                <div class="col-12 col-md-4 text-center text-md-start" id="footer-iz">
+                <div class="col-12 col-md-3 text-center text-md-start" id="footer-iz">
                     <div class="d-inline-flex align-items-center gap-2">
                         <img src="{{ asset('images/pny.png') }}" class="ny-footer-logo"
                             alt="C.I. Piscícola New York">
@@ -126,18 +125,38 @@
                     </div>
                 </div>
 
-                <div class="col-12 col-md-4 text-center small text-white-50">
-                    © {{ date('Y') }} C.I. Piscícola New York — Fabian Esteban Torres A
+                <div class="col-12 col-md-6 text-center small text-white-50">
+                    © {{ date('Y') }} | PNY. | Todos los derechos reservados.
+                    <br>
+                    <div>
+                        Fabian Esteban Torres A
+                        <span class="d-inline-flex gap-2 ms-md-2">
+                            <a href="https://www.facebook.com/torres3115" target="blank" rel="noopener noreferrer"
+                                class="ny-footer-social"><i class="bi bi-facebook"></i></a>
+                            <a href="https://www.instagram.com/torr.es31105/" target="blank"
+                                rel="noopener noreferrer" class="ny-footer-social"><i
+                                    class="bi bi-instagram"></i></a>
+                            <a href="https://github.com/Fabian3115" target="blank" rel="noopener noreferrer"
+                                class="ny-footer-social"><i class="bi bi-github"></i></a>
+                        </span> ||
+                        kevin andrey ramirez
+                        <span class="d-inline-flex gap-2 ms-md-2">
+                            <a href="https://www.facebook.com/KevinAndrey.720" target="blank"
+                                rel="noopener noreferrer" class="ny-footer-social"><i class="bi bi-facebook"></i></a>
+                            <a href="https://www.instagram.com/kevin_andrey_07/" target="blank"
+                                rel="noopener noreferrer" class="ny-footer-social"><i
+                                    class="bi bi-instagram"></i></a>
+                            <a href="https://github.com/kevinandrey07" target="blank" rel="noopener noreferrer"
+                                class="ny-footer-social"><i class="bi bi-github"></i></a>
+                        </span>
+                    </div>
+
                 </div>
 
-                <div class="col-12 col-md-4 text-center text-md-end" id="footer-de">
+                <div class="col-12 col-md-3 text-center text-md-end" id="footer-de">
                     <span class="text-white-50 small me-2"><i
-                            class="bi bi-envelope me-1"></i>contacto@piscicolany.com</span>
-                    <span class="d-inline-flex gap-2 ms-md-2">
-                        <a href="#" class="ny-footer-social"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="ny-footer-social"><i class="bi bi-twitter-x"></i></a>
-                        <a href="#" class="ny-footer-social"><i class="bi bi-linkedin"></i></a>
-                    </span>
+                            class="bi bi-envelope me-1"></i>despachos@piscicolanewyork.com</span>
+
                 </div>
             </div>
         </div>
