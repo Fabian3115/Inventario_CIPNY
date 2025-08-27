@@ -14,8 +14,7 @@ Route::get('products/create', [ProductController::class, 'create'])->name('produ
 Route::post('products/store',  [ProductController::class, 'store'])->name('products.store');
 
 
-Route::get('/products/check-code', [ProductController::class, 'checkCode'])
-    ->name('products.checkCode');
+Route::get('/products/check-code', [ProductController::class, 'checkCode'])->name('products.checkCode');
 
 //Movimientos
 //ENTRADA

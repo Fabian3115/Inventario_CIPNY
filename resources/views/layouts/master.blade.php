@@ -18,7 +18,6 @@
     <link rel="shortcut icon" href="{{ asset('images/PNY.png') }}" type="image/x-icon">
 
     <!-- Estilos personalizados -->
-    <link rel="stylesheet" href="{{ asset('css/master.css') }}">
 </head>
 
 <body>
@@ -27,7 +26,10 @@
         <!-- Topbar -->
         <header class="topbar nav-animate d-flex align-items-center px-3 shadow-sm sticky-top">
             <div class="d-flex align-items-center gap-2">
-                <img src="{{ asset('images/pny.png') }}" class="logo me-2" alt="C.I. Piscícola New York">
+                <a href="{{ route('welcome') }}"><img src="{{ asset('images/pny.png') }}" class="logo me-2"
+                        alt="C.I. Piscícola New York">
+                </a>
+
                 <div class="d-flex flex-column">
                     <h1 class="h6 mb-0 text-white fw-semibold">C.I. Piscícola New York</h1>
                     <small class="text-white-50">Sistema de Inventario</small>
