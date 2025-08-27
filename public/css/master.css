@@ -1,3 +1,705 @@
-body{
-    background-color: var(--ny-sand-50); color: var(--ny-gray-700);
+/* ===========================================================
+   C.I. PISCÍCOLA NEW YORK UI (AZUL/ROJO) – LAYOUT MAESTRO
+   =========================================================== */
+
+/* ------------ Tokens ------------ */
+:root {
+  /* Degradado diagonal corporativo */
+  --ny-red: #d72638;
+  --ny-mid: #6a2c91;
+  --ny-blue: #195ed7;
+
+  /* Auxiliares */
+  --ny-blue-700: #004aad;
+  --ny-blue-600: #0a5bca;
+  --ny-blue-100: #e8f0fe;
+
+  --ny-white: #fff;
+  --ny-gray-700: #111;
+  --ny-gray-500: #555;
+
+  /* Alturas base */
+  --header-h: 64px;
+  --footer-h: 56px;
+
+  /* Sombras */
+  --shadow-sm: 0 6px 16px rgba(0, 0, 0, .08);
+  --shadow-md: 0 10px 24px rgba(0, 0, 0, .12);
+}
+
+/* ------------ Fondo global + Sticky footer ------------ */
+body.ny-bg{
+  min-height:100vh;
+  margin:0;
+  color:var(--ny-gray-700);
+  display:flex;
+  flex-direction:column;
+
+  background-image:
+    url("../images/pny.png"),
+    linear-gradient(120deg, var(--ny-red) 0%, var(--ny-mid) 50%, var(--ny-blue) 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-position: center center, center center;
+  background-size: 400px auto, cover;
+  background-attachment: fixed, fixed;
+}
+
+/* ------------ Header ------------ */
+.ny-header {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  min-height: var(--header-h);
+  display: flex;
+  align-items: center;
+  backdrop-filter: saturate(120%) blur(4px);
+  -webkit-backdrop-filter: saturate(120%) blur(4px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+  background-color:     linear-gradient(120deg, var(--ny-red) 0%, var(--ny-mid) 50%, var(--ny-blue) 100%);
+;
+}
+
+
+/* Botón traslúcido estilo glass */
+.btn-glass {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .55rem 1.2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+
+  background: rgba(255, 255, 255, 0.15);   /* traslúcido */
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.15);
+  color: #fff; /* mantiene el color del texto */
+}
+
+.ny-logo {
+  height: 38px;
+}
+
+/* =======================================================
+   NAV INLINE (botón + opciones al lado)
+   Fondo sólo del ancho del MAIN (container-xxl)
+   ======================================================= */
+/* NAV contenedor (no lleva fondo) */
+.ny-inline-nav {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 1025;
+
+}
+
+/* El fondo va en la barra interna y se ajusta al contenido */
+/* nav: evita top “manual” y usa margen */
+.ny-inlinebar{
+  display:inline-flex;
+  align-items:center;
+  gap:.75rem;
+  background: rgba(0,0,0,.32);
+  color:#fff;
+  padding:.45rem .75rem;
+  border-radius:12px;
+  box-shadow:var(--shadow-sm);
+  transition: width .35s ease, padding .25s ease, background .25s ease;
+  width:auto;
+  max-width:100%;
+  /* position:relative; top:10px;  <-- quítalo */
+  margin-top:.5rem;              /* <- separación del header */
+}
+
+
+/* Botón hamburguesa */
+.ny-hamb {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 12px;
+  height: 34px;
+  width: 40px;
+  background: rgba(0, 0, 0, .45);
+  color: #fff;
+  transition: background .2s ease, transform .2s ease;
+  position: relative;
+  left:5px ;
+}
+
+.ny-hamb:hover {
+  background: rgba(0, 0, 0, .6);
+  transform: translateY(-1px);
+}
+
+.ny-hamb-burger,
+.ny-hamb-burger::before,
+.ny-hamb-burger::after {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+}
+
+.ny-hamb-burger {
+  position: relative;
+}
+
+.ny-hamb-burger::before {
+  position: absolute;
+  top: -6px;
+}
+
+.ny-hamb-burger::after {
+  position: absolute;
+  top: 6px;
+}
+
+/* Contenedor de opciones que se despliega A LA DERECHA del botón */
+.ny-inline {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  overflow: hidden;
+  max-width: 0;
+  /* cerrado por defecto */
+  opacity: 0;
+  transition: max-width .35s cubic-bezier(.22, .61, .36, 1), opacity .25s ease;
+}
+
+.ny-inline.is-open {
+  max-width: 100%;
+  /* se expande dentro de la barra */
+  opacity: 1;
+}
+
+/* Ítem principal (botón + submenú inline) */
+.ny-item {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+/* Botón principal de cada opción */
+.ny-mainbtn {
+  appearance: none;
+  border: 1px solid rgba(172, 172, 172, 0.16);
+  background: rgba(80, 80, 80, 0.08);
+  color: #fff;
+  border-radius: 12px;
+  padding: .55rem .75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform .22s ease, background .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+
+.ny-mainbtn i {
+  font-size: 1rem;
+}
+
+.ny-mainbtn .chevron {
+  opacity: .9;
+  transition: transform .22s ease;
+}
+
+.ny-mainbtn:hover {
+  background: rgba(255, 255, 255, .14);
+  border-color: rgba(255, 255, 255, .28);
+  transform: translateY(-1px);
+}
+
+.ny-item.open .ny-mainbtn {
+  background: rgba(255, 255, 255, .18);
+  border-color: rgba(255, 255, 255, .38);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2);
+}
+
+.ny-item.open .ny-mainbtn .chevron {
+  transform: rotate(180deg);
+}
+
+/* Submenú inline (aparece a la derecha y empuja el resto) */
+.ny-submenu {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  transition: max-width .32s cubic-bezier(.22, .61, .36, 1), opacity .2s ease;
+}
+
+.ny-item.open .ny-submenu {
+  max-width: 520px;
+  opacity: 1;
+}
+
+/* Píldoras del submenú */
+.ny-subpill {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: #fff;
+  text-decoration: none;
+  background: rgba(255, 255, 255, .10);
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  padding: .45rem .65rem;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.ny-subpill i {
+  font-size: .95rem;
+  opacity: .95;
+}
+
+.ny-subpill:hover {
+  background: rgba(255, 255, 255, .18);
+  border-color: rgba(255, 255, 255, .30);
+  transform: translateX(4px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+}
+
+/* Responsive: permite wrap si falta ancho */
+@media (max-width:576px) {
+  .ny-inline {
+    flex-wrap: wrap;
+    row-gap: .4rem;
+  }
+}
+
+/* ------------ Main centrado + glass ------------ */
+.ny-main {
+  /* ocupa el espacio entre header/nav y footer */
+  flex: 1 0 auto;
+
+  /* centra verticalmente el contenedor visual (cuando hay mucho espacio) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  /* respiración */
+}
+
+/* main: evita bottom “manual” y usa margen */
+.ny-main > .container-xxl{
+  width:100%;
+  background: rgba(255,255,255,.30);   /* si quieres más opacidad del glass */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.32);
+  border-radius:16px;
+  box-shadow: var(--shadow-md);
+  /* position:relative; bottom:20px;  <-- quítalo */
+  margin-top:.5rem;
+  position: relative;
+  bottom: 10px;                  /* <- separación del nav */
+}
+
+
+
+
+/* ------------ Footer compacto (NO fijo) ------------ */
+.ny-footer {
+  color: #fff;
+  background: rgba(0, 0, 0, .32);
+  margin-top: auto;
+  /* empuja el footer al final si hay poco contenido */
+}
+
+.ny-footer .container-xxl {
+  line-height: 1;
+}
+
+.ny-footer-logo {
+  height: 24px;
+}
+
+.ny-footer-social {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, .22);
+  color: #fff;
+  font-size: .9rem;
+  transition: background .2s ease, transform .2s ease;
+}
+
+.ny-footer-social:hover {
+  background: rgba(255, 255, 255, .34);
+  transform: translateY(-1px);
+}
+
+/* ------------ Hero / KPIs (welcome) ------------ */
+.welcome-hero {
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .18);
+}
+
+.welcome-hero .glassy {
+  background: rgba(255, 255, 255, .16);
+  backdrop-filter: blur(6px);
+}
+
+.hero-wave {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 86px;
+  opacity: .20;
+  fill: #000;
+}
+
+.bg-teal {
+  background: var(--ny-blue-600) !important;
+  color: #fff;
+}
+
+/* Atajos */
+.quick-action {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  background: #fff;
+  color: var(--ny-gray-700);
+  text-decoration: none;
+  border-radius: 999px;
+  padding: .55rem .9rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid #eef1f5;
+  transition: transform .18s, box-shadow .18s;
+}
+
+.quick-action i {
+  font-size: 1.05rem;
+  color: var(--ny-blue-700);
+}
+
+.quick-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .10);
+}
+
+/* KPIs */
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  transform: translateY(8px) scale(.98);
+  animation: cardReveal .5s cubic-bezier(.22, .61, .36, 1) forwards;
+  border-left: 6px solid var(--ny-blue-600);
+}
+
+.kpi-card .kpi-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--ny-blue-100), #ffffff);
+  box-shadow: inset 0 4px 14px rgba(0, 0, 0, .06), 0 4px 10px rgba(0, 0, 0, .05);
+  color: #d72638;
+}
+
+.kpi-body .kpi-label {
+  display: block;
+  font-size: .8rem;
+  color: var(--ny-gray-500);
+}
+
+.kpi-body .kpi-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--ny-gray-700);
+}
+
+/* Aparición escalonada reutilizada */
+.has-anim {
+  opacity: 0;
+  transform: translateY(8px) scale(.98);
+}
+
+.has-anim.is-revealed {
+  animation: cardReveal .5s cubic-bezier(.22, .61, .36, 1) forwards;
+}
+/* =========================================================
+   GLASS GLOBAL PARA TODO EL CONTENIDO DENTRO DE .ny-main
+   (sin tocar botones ni inputs de Bootstrap)
+   ========================================================= */
+
+/* Tarjetas/contendedores principales */
+.ny-main .card {
+  background: rgba(255, 255, 255, .18);              /* opacidad suave */
+  backdrop-filter: blur(8px) saturate(110%);
+  -webkit-backdrop-filter: blur(8px) saturate(110%);
+  border: 1px solid rgba(255, 255, 255, .28);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .10);
+  border-radius: 16px;
+}
+
+/* Cabeceras de tarjetas: deja tus degradados si ya existen;
+   si no tienen, dales una banda suave translúcida */
+.ny-main .card-header {
+  background: rgba(255, 255, 255, .10);
+  border: 0;
+}
+
+/* Cuerpos de tarjetas: sin fondo extra, heredan el glass del padre */
+.ny-main .card-body {
+  background: transparent;
+}
+
+/* Bloques de “filtros” que también son .card */
+.ny-main .card.shadow-sm.border-0 {
+  border: 1px solid rgba(255, 255, 255, .28) !important;
+}
+
+/* Tablas dentro de tarjetas: que el fondo sea transparente */
+.ny-main .table {
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(255, 255, 255, .08);
+  --bs-table-hover-bg: rgba(255, 255, 255, .12);
+}
+
+/* Encabezado de tabla fijo con glass */
+.ny-main thead.table-light {
+  background: rgba(255, 255, 255, .18) !important;
+  backdrop-filter: blur(6px) saturate(110%);
+  -webkit-backdrop-filter: blur(6px) saturate(110%);
+  border-bottom: 1px solid rgba(255, 255, 255, .28);
+}
+
+/* Alertas (validación, etc.) con glass */
+.ny-main .alert {
+  background: rgba(255, 255, 255, .18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, .28);
+  border-radius: 12px;
+}
+
+/* Mantén inputs legibles (blancos casi sólidos) */
+.ny-main .form-control,
+.ny-main .form-select,
+.ny-main .input-group-text,
+.ny-main .form-control:disabled,
+.ny-main .form-select:disabled {
+  background: rgba(255, 255, 255, .92);
+  border-color: #e6ebf2;
+}
+
+/* Hover/focus coherente con tu paleta */
+.ny-main .form-control:focus,
+.ny-main .form-select:focus {
+  border-color: var(--ny-blue-600, #0a5bca);
+  box-shadow: 0 0 0 .15rem rgba(10, 91, 202, .12);
+}
+
+/* Paginación dentro de cards: que no “corten” el glass */
+.ny-main .card-footer {
+  background: rgba(255, 255, 255, .10);
+  border-top: 1px solid rgba(255, 255, 255, .22);
+}
+
+/* Variante por si quieres un glass un poco más fuerte en alguna vista */
+.ny-glass-strong {
+  background: rgba(255, 255, 255, .24) !important;
+  border: 1px solid rgba(255, 255, 255, .32) !important;
+  backdrop-filter: blur(10px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(115%) !important;
+}
+/* ===============================
+   Tablas translúcidas completas
+   =============================== */
+
+/* Contenedor de la tabla */
+.ny-main .table {
+  --bs-table-bg: rgba(255, 255, 255, .14);  /* fondo translúcido general */
+  --bs-table-striped-bg: rgba(255, 255, 255, .18);
+  --bs-table-hover-bg: rgba(255, 255, 255, .22);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Encabezados (th) más opacos */
+.ny-main .table thead th {
+  background: rgba(255, 255, 255, .26) !important;
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  font-weight: 600;
+  color: #111;
+  border-bottom: 1px solid rgba(255, 255, 255, .35);
+}
+
+/* Filas del cuerpo (td) */
+.ny-main .table tbody td {
+  background: rgba(255, 255, 255, .14);
+  border-bottom: 1px solid rgba(255, 255, 255, .18);
+}
+
+/* Footer (ejemplo: "Mostrando 1–3 de 3") */
+.ny-main .table tfoot,
+.ny-main .dataTables_info,
+.ny-main .pagination {
+  background: rgba(255, 255, 255, .20);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-top: 1px solid rgba(255, 255, 255, .28);
+  border-radius: 0 0 12px 12px;
+  padding: .5rem .75rem;
+  font-size: .875rem;
+  color: #111;
+}
+/* ===========================================================
+   GLASSIFY (reutiliza el look de Registrar entrada)
+   Actívalo envolviendo el contenido con .glassify-page
+   =========================================================== */
+.glassify-page .glass-panel,
+.glassify-page .card {
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(10px) saturate(1.05);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+
+/* margen interno uniforme */
+.glassify-page .card-body { background: transparent; }
+
+/* Header con misma barra degradada y animación */
+.glassify-page .card-header.brand,
+.glassify-page .panel-header.brand {
+  background: linear-gradient(100deg, var(--ny-blue-700,#004aad), var(--ny-red,#d72638));
+  background-size: 200% 100%;
+  animation: nyStripe 6s ease infinite;
+  color: #fff;
+  border: 0;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+@keyframes nyStripe {
+  0%,100% { background-position: 0% 0; }
+  50%     { background-position: 100% 0; }
+}
+
+/* Header “Tips” (mismo remate) */
+.glassify-page .card-header.tips,
+.glassify-page .panel-header.tips {
+  background: linear-gradient(100deg, var(--ny-blue-700,#004aad), var(--ny-red,#d72638));
+  color:#fff; border:0;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+/* Contenedor grande (el “marco” del módulo) */
+.glassify-shell {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+
+/* -------- Tablas traslúcidas (listas) -------- */
+.glassify-page .glass-table {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.glassify-page .glass-table table { margin: 0; background: transparent; }
+.glassify-page .glass-table thead {
+  background: rgba(255,255,255,.22); /* un poco más opaco en TH */
+  backdrop-filter: blur(8px);
+}
+.glassify-page .glass-table thead th {
+  border-bottom-color: rgba(255,255,255,.28);
+}
+.glassify-page .glass-table tbody tr {
+  background: rgba(255,255,255,.10);
+}
+.glassify-page .glass-table tbody tr + tr td {
+  border-top-color: rgba(255,255,255,.18);
+}
+.glassify-page .glass-table .card-footer,
+.glassify-page .glass-table-footer {
+  background: rgba(255,255,255,.18);   /* pie más opaco */
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,.25);
+}
+
+/* Filtro/KPIs en listas */
+.glassify-page .glass-filters,
+.glassify-page .kpi-glass {
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 14px;
+}
+
+/* -------- Tips colapsables (botón “i”) -------- */
+.glassify-page [data-tips] { position: relative; }
+.glassify-page .tips-fab {
+  position: sticky; top: 1rem; align-self: flex-start; margin-left: auto;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; border: 0; color: #fff;
+  background: linear-gradient(135deg, var(--ny-red,#d72638), var(--ny-blue-700,#004aad));
+  box-shadow: 0 8px 20px rgba(0,0,0,.15);
+}
+.glassify-page .tips-close {
+  background: rgba(255,255,255,.15); border: 0; padding: .25rem .5rem; border-radius: 8px; color:#fff;
+}
+@media (max-width: 991.98px) { .glassify-page .tips-fab { display: none !important; } }
+
+
+
+/* Animaciones base */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(.98);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------ Ajustes móviles ------------ */
+@media (max-width:576px) {
+  .ny-header {
+    min-height: 56px;
+  }
 }
