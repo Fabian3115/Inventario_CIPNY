@@ -59,9 +59,16 @@
                                             <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
                                             <input id="codeInput" type="number" min="1" name="code"
                                                 class="form-control @error('code') is-invalid @enderror"
-                                                value="{{ old('code') }}" placeholder="Ej: 1001" required
-                                                data-check-url="{{ route('products.checkCode') }}">
+                                                value="{{ old('code', $nextCode ?? '') }}" placeholder="Ej: 1001" required
+                                                data-check-url="{{ route('products.checkCode') }}"
+                                                data-next-url="{{ route('products.nextCode') }}">
+                                            <button class="btn btn-outline-primary" type="button" id="suggestCodeBtn"
+                                                title="Sugerir siguiente código">
+                                                <i class="bi bi-magic"></i>
+                                            </button>
                                         </div>
+
+
                                         <div id="codeMsg" class="form-text"></div>
                                         @error('code')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -103,13 +110,18 @@
                                         <label class="form-label fw-semibold">Descripción</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="bi bi-card-text"></i></span>
-                                            <input type="text" name="description"
+                                            <input id="descriptionInput" type="text" name="description"
                                                 class="form-control @error('description') is-invalid @enderror"
                                                 value="{{ old('description') }}"
                                                 placeholder="Nombre o detalle del producto" required>
                                             @error('description')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
+                                        </div>
+
+                                        {{-- Vista previa: así se guardará en BD --}}
+                                        <div id="descriptionPreview" class="form-text" aria-live="polite">
+                                            Así se guardará: <strong id="descriptionPreviewText">—</strong>
                                         </div>
                                     </div>
 
@@ -135,9 +147,9 @@
                                         </datalist>
                                     </div>
 
-                                    {{-- Unidad de medida (extent) --}}
+                                    {{-- Unidad de Medida (extent) --}}
                                     <div class="col-12 col-md-6">
-                                        <label class="form-label fw-semibold">Unidad de medida</label>
+                                        <label class="form-label fw-semibold">Unidad de Medida</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="bi bi-rulers"></i></span>
                                             <input list="units_suggestions" type="text" name="extent"
@@ -360,5 +372,189 @@
             setCollapsed(true);
         })();
     </script>
+
+    {{-- Codigo Sugerido e inyectado --}}
+    <script>
+        (() => {
+            const input = document.getElementById('codeInput');
+            const msg = document.getElementById('codeMsg');
+            if (!input || !msg) return;
+
+            const checkUrl = input.dataset.checkUrl;
+            const nextUrl = input.dataset.nextUrl;
+            let timer = null;
+            let currentAbort = null;
+
+            const setState = (state, text = '') => {
+                input.classList.remove('is-valid', 'is-invalid');
+                msg.className = 'form-text';
+                msg.textContent = '';
+
+                if (state === 'invalid') {
+                    input.classList.add('is-invalid');
+                    msg.classList.add('text-danger');
+                    msg.textContent = text || 'Código inválido: use números positivos.';
+                    return;
+                }
+                if (state === 'exists') {
+                    input.classList.add('is-invalid');
+                    msg.classList.add('text-danger');
+                    msg.textContent = text || 'Código ocupado — cámbielo.';
+                    return;
+                }
+                if (state === 'available') {
+                    input.classList.add('is-valid');
+                    msg.classList.add('text-success');
+                    msg.textContent = text || 'Código disponible.';
+                    return;
+                }
+                if (state === 'checking') {
+                    msg.classList.add('text-muted');
+                    msg.textContent = text || 'Verificando...';
+                    return;
+                }
+                if (state === 'suggest') {
+                    msg.classList.add('text-muted');
+                    msg.textContent = text || 'Sugerido automáticamente.';
+                    return;
+                }
+                if (state === 'error') {
+                    msg.classList.add('text-warning');
+                    msg.textContent = text || 'No se pudo verificar. Intente de nuevo.';
+                }
+            };
+
+            const getNextCode = async () => {
+                if (!nextUrl) return;
+                try {
+                    const res = await fetch(nextUrl, {
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        cache: 'no-store'
+                    });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const next = parseInt(data.next, 10);
+                    if (Number.isFinite(next) && next > 0) {
+                        input.value = String(next);
+                        setState('suggest', 'Sugerido: ' + next);
+                        // Valida inmediatamente el sugerido
+                        checkCode(String(next));
+                    }
+                } catch (_) {
+                    /* silencio */
+                }
+            };
+
+            const checkCode = async (val) => {
+                if (currentAbort) currentAbort.abort();
+                currentAbort = new AbortController();
+
+                if (!/^\d+$/.test(val) || parseInt(val, 10) < 1) {
+                    setState('invalid');
+                    return;
+                }
+                setState('checking');
+
+                try {
+                    const res = await fetch(`${checkUrl}?code=${encodeURIComponent(val)}`, {
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        cache: 'no-store',
+                        signal: currentAbort.signal
+                    });
+                    if (!res.ok) {
+                        setState('error');
+                        return;
+                    }
+                    const data = await res.json();
+                    if (data.valid === false) {
+                        setState('invalid');
+                        return;
+                    }
+                    data.exists ? setState('exists') : setState('available');
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                    setState('error');
+                }
+            };
+
+            const onChange = () => {
+                const raw = (input.value || '').trim();
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    if (raw === '') {
+                        // Si quedó vacío, vuelve a sugerir el siguiente código actual en DB
+                        getNextCode();
+                    } else {
+                        checkCode(raw);
+                    }
+                }, 250);
+            };
+
+            input.addEventListener('input', onChange);
+            input.addEventListener('change', onChange);
+
+            // Al cargar:
+            const initial = (input.value || '').trim();
+            if (initial === '') {
+                // Si el servidor no precargó (o se perdió el old), sugiere en vivo
+                getNextCode();
+            } else {
+                // Si ya hay valor (por old() o $nextCode), validarlo
+                checkCode(initial);
+            }
+        })();
+
+        const btnSuggest = document.getElementById('suggestCodeBtn');
+        btnSuggest?.addEventListener('click', () => {
+            input.value = '';
+            input.dispatchEvent(new Event('input', {
+                bubbles: true
+            }));
+        });
+    </script>
+
+    {{-- Manejo de descripción; EJ: Limpiador De Contacto --}}
+    <script>
+        (() => {
+            const el = document.getElementById('descriptionInput');
+            const pv = document.getElementById('descriptionPreviewText');
+            if (!el || !pv) return;
+
+            // Misma lógica que en el mutator del modelo (título por palabra, robusto en UTF-8)
+            const toTitleEs = (s) => {
+                let out = (s || '').toLocaleLowerCase('es-CO'); // 1) minúsculas con locale
+                out = out.replace(/\b\p{L}/gu, (m) => m.toLocaleUpperCase(
+                'es-CO')); // 2) inicial de cada palabra en mayúscula
+                out = out.replace(/\s+/g, ' ').trim(); // 3) colapsar espacios
+                return out;
+            };
+
+            const render = () => {
+                const normalized = toTitleEs(el.value);
+                pv.textContent = normalized || '—';
+            };
+
+            // Formatear en vivo y al salir del campo
+            el.addEventListener('input', render);
+            el.addEventListener('blur', () => {
+                el.value = toTitleEs(el.value); // también reescribe el input para que se envíe así
+                render();
+            });
+
+            // Asegurar que se envíe normalizado
+            el.form?.addEventListener('submit', () => {
+                el.value = toTitleEs(el.value);
+                render();
+            });
+
+            // Estado inicial
+            render();
+        })();
+    </script>
+
 
 @endsection

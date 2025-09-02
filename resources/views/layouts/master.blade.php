@@ -19,6 +19,7 @@
 
     <link rel="shortcut icon" href="{{ asset('images/PNY.png') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ asset('css/master.css') }}">
+    @stack('styles')
 </head>
 
 <body class="ny-bg">
@@ -78,30 +79,18 @@
                 <!-- Entradas -->
                 <div class="ny-item" data-sub="subIn">
                     <button class="ny-mainbtn" type="button">
-                        <i class="bi bi-box-arrow-in-down"></i><span>Entradas</span>
+                        <i class="bi bi-box-arrow-in-down"></i><span>Movimientos</span>
                         <i class="bi bi-chevron-down chevron"></i>
                     </button>
                     <div class="ny-submenu" id="subIn" role="menu" aria-label="Entradas">
-                        <a class="ny-subpill" href="{{ route('movements.in.create') }}"><i class="bi bi-plus-lg"></i>
+                        <a class="ny-subpill" href="{{ route('movements.create') }}"><i class="bi bi-plus-lg"></i>
                             Registrar</a>
-                        <a class="ny-subpill" href="{{ route('movements.in.index') }}"><i
+                        <a class="ny-subpill" href="{{ route('movements.index') }}"><i
                                 class="bi bi-clock-history"></i> Historial</a>
                     </div>
                 </div>
 
-                <!-- Salidas -->
-                <div class="ny-item" data-sub="subOut">
-                    <button class="ny-mainbtn" type="button">
-                        <i class="bi bi-box-arrow-up"></i><span>Salidas</span>
-                        <i class="bi bi-chevron-down chevron"></i>
-                    </button>
-                    <div class="ny-submenu" id="subOut" role="menu" aria-label="Salidas">
-                        <a class="ny-subpill" href="{{ route('movements.out.create') }}"><i class="bi bi-dash-lg"></i>
-                            Registrar</a>
-                        <a class="ny-subpill" href="{{ route('movements.out.index') }}"><i
-                                class="bi bi-clock-history"></i> Historial</a>
-                    </div>
-                </div>
+
             </div>
         </div>
     </nav>
@@ -212,6 +201,7 @@
             });
         })();
     </script>
+    @stack('scripts')
 </body>
 
 </html>

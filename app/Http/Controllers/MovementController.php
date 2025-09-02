@@ -2,294 +2,298 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\MovementsInExport;
-use App\Exports\MovementsOutExport;
 use App\Models\Movement;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
+use App\Exports\MovementsExport;
+use App\Exports\MovementsTemplateExport;
+use App\Imports\MovementsImport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class MovementController extends Controller
 {
+    /**
+     * Listado con filtros + paginación
+     */
+    public function index(Request $request)
+    {
+        $products = Product::orderBy('description')->get(['id', 'code', 'description']);
+
+        $query = Movement::with('product')
+            ->when($request->filled('type'), fn($q) => $q->where('type', $request->type))
+            ->when($request->filled('product_id'), fn($q) => $q->where('product_id', $request->product_id))
+            ->when($request->filled('area'), fn($q) => $q->where('area', 'like', '%' . $request->area . '%'))
+            ->when($request->filled('requisition'), fn($q) => $q->where('requisition', 'like', '%' . $request->requisition . '%')) // <-- nuevo
+            ->when($request->filled('date_from'), fn($q) => $q->whereDate('date_products', '>=', $request->date_from))
+            ->when($request->filled('date_to'), fn($q) => $q->whereDate('date_products', '<=', $request->date_to))
+            ->orderByDesc('date_products')
+            ->orderByDesc('id');
+
+        $movements = $query->paginate(10)->appends($request->query());
+
+        return view('movimientos.index', compact('movements', 'products'));
+    }
 
     /**
-     * ENTRADA
+     * Formulario de creación (vista interactiva)
      */
-
-
-    public function index_entrada(Request $r)
+    public function create()
     {
-        // Base: ENTRADAS con alias
-        $base = Movement::query()
-            ->from('movements as m')
-            ->join('products as p', 'm.product_id', '=', 'p.id')
-            ->where('m.type', 'entrada')
-            ->select(
-                'm.*',
-                'p.code as p_code',
-                'p.description as p_description',
-                'p.extent as p_extent',
-                'p.warehouse as p_warehouse'
-            );
+        // Puedes cargar solo lo necesario para el combo
+        $products = Product::orderBy('description')->get([
+            'id',
+            'code',
+            'description',
+            'stock',
+            'categories',
+            'extent',
+            'warehouse'
+        ]);
 
-        // Filtros
-        if ($r->filled('q')) {
-            $kw = trim($r->q);
-            $base->where(function ($q) use ($kw) {
-                $q->where('p.description', 'like', "%{$kw}%")
-                    ->orWhere('p.code', 'like', "%{$kw}%");
-            });
+        return view('movimientos.create', compact('products'));
+    }
+
+    /**
+     * Guardar movimiento con validación de stock y actualización de producto
+     */
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'product_id'    => ['required', 'exists:products,id'],
+            'date_products' => ['required', 'date'],
+            'type'          => ['required', 'in:entrada,salida'],
+            'amount'        => ['required', 'integer', 'min:1'],
+            'delivered_to'  => ['nullable', 'string', 'max:255'],
+            'area'          => ['nullable', 'string', 'max:255'],
+            'taken_by'      => ['nullable', 'string', 'max:255'],
+            'requisition'   => ['nullable', 'string', 'max:255'], // <-- nuevo
+        ]);
+
+        if ($data['type'] === 'salida') {
+            $request->validate([
+                'delivered_to' => ['required', 'string', 'max:255'],
+                'area'         => ['required', 'string', 'max:255'],
+                'taken_by'     => ['required', 'string', 'max:255'],
+            ]);
         }
-        if ($r->filled('product_id'))   $base->where('m.product_id', $r->product_id);
-        if ($r->filled('delivered_to')) $base->where('m.delivered_to', 'like', '%' . $r->delivered_to . '%');
-        if ($r->filled('taken_by'))     $base->where('m.taken_by', 'like', '%' . $r->taken_by . '%');
-        if ($r->filled('date_from'))    $base->whereDate('m.date_products', '>=', $r->date_from);
-        if ($r->filled('date_to'))      $base->whereDate('m.date_products', '<=', $r->date_to);
 
-        // Orden
-        $allowed = ['date_products', 'amount', 'p_code', 'p_description', 'delivered_to', 'taken_by'];
-        $sort = in_array($r->get('sort'), $allowed) ? $r->get('sort') : 'date_products';
-        $dir  = in_array($r->get('dir'), ['asc', 'desc']) ? $r->get('dir') : 'desc';
+        $product = Product::lockForUpdate()->findOrFail($data['product_id']);
 
-        // Mapear columnas para evitar ambigüedad
-        $sortMap = [
-            'p_code'        => 'p_code',
-            'p_description' => 'p_description',
-            'date_products' => 'm.date_products',
-            'amount'        => 'm.amount',
-            'delivered_to'  => 'm.delivered_to',
-            'taken_by'      => 'm.taken_by',
-        ];
-        $base->orderBy($sortMap[$sort] ?? 'm.date_products', $dir);
-
-        // KPIs antes de paginar
-        $k = clone $base;
-        $stats = [
-            'count'      => (clone $k)->count(),
-            'sum_amount' => (clone $k)->sum('m.amount'),
-            'today'      => (clone $k)->whereDate('m.date_products', now()->toDateString())->count(),
-        ];
-
-        // Datos
-        $entries = $base->paginate(12)->withQueryString();
-
-        // Combos
-        $products   = Product::orderBy('description')->get(['id', 'code', 'description']);
-        $deliverers = Movement::where('type', 'entrada')
-            ->whereNotNull('delivered_to')
-            ->distinct()->orderBy('delivered_to')
-            ->pluck('delivered_to');
-
-        return view('movimientos.lista_entrada', compact('entries', 'products', 'deliverers', 'stats'));
-    }
-
-    public function create_entrada()
-    {
-        // Trae productos (muestra código, nombre, unidad y stock actual)
-        $products = Product::orderBy('description')
-            ->get(['id', 'code', 'description', 'extent', 'stock']);
-
-        return view('movimientos.entrada', compact('products'));
-    }
-
-    /**
-     * Guarda la ENTRADA y suma al stock
-     */
-    public function store_entrada(Request $request)
-    {
-        $validated = $request->validate(
-            [
-                'product_id'    => ['required', 'exists:products,id'],
-                'date_products' => ['required', 'date'],
-                'amount'        => ['required', 'numeric', 'min:0.0001'],
-            ],
-            [
-                'product_id.required'    => 'Seleccione un producto.',
-                'product_id.exists'      => 'El producto no existe.',
-                'date_products.required' => 'La fecha es obligatoria.',
-                'date_products.date'     => 'Fecha inválida.',
-                'amount.required'        => 'La cantidad es obligatoria.',
-                'amount.numeric'         => 'La cantidad debe ser numérica.',
-                'amount.min'             => 'La cantidad debe ser mayor a 0.',
-            ]
-        );
-
-        DB::transaction(function () use ($validated) {
-            // 1) Bloquea el producto para actualización de stock
-            $product = Product::where('id', $validated['product_id'])
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            // 2) Crea el movimiento de ENTRADA
-            $movement = new Movement();
-            $movement->product_id    = $validated['product_id'];
-            $movement->date_products = $validated['date_products'];
-            $movement->type          = 'entrada';
-            $movement->amount        = $validated['amount'];
-            $movement->save();
-
-            // 3) Suma al stock del producto
-            // Si tu 'stock' es entero, redondea/castea según tu negocio.
-            $product->stock = $product->stock + $validated['amount'];
-            $product->save();
-        });
-
-        return redirect()
-            ->route('movements.in.index')
-            ->with('success', 'Entrada registrada y stock actualizado.');
-    }
-
-    public function ExportEntrada(Request $request)
-    {
-        $filters = $request->only(['q', 'product_id', 'date_from', 'date_to', 'sort', 'dir']);
-        return Excel::download(new MovementsInExport($filters), 'entradas.xlsx');
-    }
-
-    /**
-     * SALIDA
-     */
-
-    public function index_salida(Request $r)
-    {
-        // Base: SALIDAS con alias consistentes
-        $base = Movement::query()
-            ->where('movements.type', 'salida')
-            ->join('products', 'movements.product_id', '=', 'products.id')
-            ->select(
-                'movements.*',
-                'products.code as p_code',
-                'products.description as p_description',
-                'products.extent as p_extent',
-                'products.warehouse as p_warehouse'
-            );
-
-        // Filtros
-        if ($r->filled('q')) {
-            $kw = trim($r->q);
-            $base->where(function ($q) use ($kw) {
-                $q->where('products.description', 'like', "%{$kw}%")
-                    ->orWhere('products.code', 'like', "%{$kw}%");
-            });
-        }
-        if ($r->filled('product_id'))   $base->where('movements.product_id', $r->product_id);
-        if ($r->filled('delivered_to')) $base->where('movements.delivered_to', 'like', '%' . $r->delivered_to . '%');
-        if ($r->filled('taken_by'))     $base->where('movements.taken_by', 'like', '%' . $r->taken_by . '%');
-        if ($r->filled('date_from'))    $base->whereDate('movements.date_products', '>=', $r->date_from);
-        if ($r->filled('date_to'))      $base->whereDate('movements.date_products', '<=', $r->date_to);
-        if ($r->filled('area'))         $base->where('movements.area', $r->area); // NUEVO
-
-        // Orden
-        $sort = $r->get('sort', 'date_products');
-        $dir  = $r->get('dir', 'desc');
-        $allowed = ['date_products', 'amount', 'p_code', 'p_description', 'delivered_to', 'taken_by', 'area']; // NUEVO
-        if (!in_array($sort, $allowed)) $sort = 'date_products';
-        if (!in_array($dir, ['asc', 'desc'])) $dir = 'desc';
-        $base->orderBy($sort, $dir);
-
-        // KPIs
-        $stats = [
-            'count'      => (clone $base)->count(),
-            'sum_amount' => (clone $base)->sum('amount'),
-            'today'      => (clone $base)->whereDate('movements.date_products', now()->toDateString())->count(),
-        ];
-
-        $exits     = $base->paginate(12)->withQueryString();
-        $products  = Product::orderBy('description')->get(['id', 'code', 'description']);
-        $receivers = Movement::where('type', 'OUT')->whereNotNull('delivered_to')
-            ->distinct()->orderBy('delivered_to')->pluck('delivered_to');
-        $areas     = Movement::where('type', 'salida')->whereNotNull('area')  // NUEVO
-            ->distinct()->orderBy('area')->pluck('area');
-
-        return view('movimientos.lista_salida', compact('exits', 'products', 'receivers', 'stats', 'areas')); // NUEVO
-    }
-
-    public function create_salida()
-    {
-        $products = Product::orderBy('description')
-            ->get(['id', 'code', 'description', 'extent', 'stock', 'warehouse']);
-
-        return view('movimientos.salida', compact('products'));
-    }
-
-    /**
-     * Guarda la SALIDA y resta del stock
-     */
-    public function store_salida(Request $request)
-    {
-        $validated = $request->validate(
-            [
-                'product_id'    => ['required', 'exists:products,id'],
-                'date_products' => ['required', 'date'],
-                'amount'        => ['required', 'numeric', 'min:0.0001'], // si tu stock es entero, cambia a integer|min:1
-                'delivered_to'  => ['required', 'string', 'max:150'],     // Persona que recibe
-                'area'         => ['required', 'string', 'max:150'],     // Área que recibe
-                'taken_by'      => ['required', 'string', 'max:150'],     // Persona que retira
-            ],
-            [
-                'product_id.required'    => 'Seleccione un producto.',
-                'product_id.exists'      => 'El producto no existe.',
-                'date_products.required' => 'La fecha es obligatoria.',
-                'date_products.date'     => 'Fecha inválida.',
-                'amount.required'        => 'La cantidad es obligatoria.',
-                'amount.numeric'         => 'La cantidad debe ser numérica.',
-                'amount.min'             => 'La cantidad debe ser mayor a 0.',
-                'delivered_to.required'  => 'Indique a quién se entrega.',
-                'area.required'         => 'Indique el área que recibe.',
-                'taken_by.required'      => 'Indique quién retira.',
-            ]
-        );
-
-        DB::transaction(function () use ($validated) {
-            // 1) Bloquear el producto para cálculo de stock
-            $product = Product::where('id', $validated['product_id'])
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            // 2) Validar stock suficiente
-            $available = (float)$product->stock;
-            $toRemove  = (float)$validated['amount'];
-            if ($toRemove > $available) {
-                throw ValidationException::withMessages([
-                    'amount' => "No hay stock suficiente. Disponible: {$available}.",
+        return DB::transaction(function () use ($data, $product) {
+            if ($data['type'] === 'salida' && $data['amount'] > $product->stock) {
+                return back()->withInput()->withErrors([
+                    'amount' => 'No puedes retirar más de lo disponible en stock (' . $product->stock . ').'
                 ]);
             }
 
-            // 3) Registrar movimiento de SALIDA
-            Movement::create([
-                'product_id'    => $validated['product_id'],
-                'date_products' => $validated['date_products'],
-                'type'          => 'salida',
-                'amount'        => $validated['amount'],
-                'delivered_to'  => $validated['delivered_to'],    // persona que recibe
-                'area'         => $validated['area'],         // área que recibe
-                'taken_by'      => $validated['taken_by'],       // quien registra
-            ]);
+            $movement = Movement::create($data);
 
-            // 4) Descontar del stock
-            $product->stock = $available - $toRemove;
-            $product->save();
+            if ($data['type'] === 'entrada') {
+                $product->increment('stock', (int)$data['amount']);
+            } else {
+                $product->decrement('stock', (int)$data['amount']);
+            }
+
+            return redirect()->route('movements.index')->with('success', 'Movimiento registrado correctamente.');
         });
-
-        return redirect()
-            ->route('movements.out.index')
-            ->with('success', 'Salida registrada y stock actualizado.');
     }
 
-    public function ExportSalida(Request $request)
+    public function edit(Movement $movement)
     {
-        $filters = $request->only([
-            'q',
-            'product_id',
-            'area',
-            'date_from',
-            'date_to',
-            'delivered_to',
-            'taken_by',
-            'sort',
-            'dir'
+        // Productos para el select
+        $products = Product::orderBy('description')->get([
+            'id',
+            'code',
+            'description',
+            'stock',
+            'categories',
+            'extent',
+            'warehouse'
         ]);
-        return Excel::download(new MovementsOutExport($filters), 'salidas.xlsx');
+
+        // Catálogos opcionales (si no los pasas desde el controlador principal)
+        $areas = ['Bodega A', 'Bodega B', 'Mantenimiento', 'Producción', 'Sistemas', 'Administración'];
+        $takenByList = ['Juan Pérez', 'Ana Gómez', 'Carlos Ruiz', 'María López', 'Invitado'];
+
+        return view('movimientos.edit', compact('movement', 'products', 'areas', 'takenByList'));
+    }
+
+    public function update(Request $request, Movement $movement)
+    {
+        // Validación base
+        $data = $request->validate([
+            'product_id'    => ['required', 'exists:products,id'],
+            'date_products' => ['required', 'date'],
+            'type'          => ['required', 'in:entrada,salida'],
+            'amount'        => ['required', 'integer', 'min:1'],
+            'delivered_to'  => ['nullable', 'string', 'max:255'],
+            'area'          => ['nullable', 'string', 'max:255'],
+            'taken_by'      => ['nullable', 'string', 'max:255'],
+        ]);
+
+        if ($data['type'] === 'salida') {
+            $request->validate([
+                'delivered_to' => ['required', 'string', 'max:255'],
+                'area'         => ['required', 'string', 'max:255'],
+                'taken_by'     => ['required', 'string', 'max:255'],
+            ]);
+        }
+
+        // Transacción con locks para evitar condiciones de carrera
+        return DB::transaction(function () use ($movement, $data) {
+            $oldProductId = $movement->product_id;
+            $oldType      = $movement->type;
+            $oldAmount    = (int) $movement->amount;
+
+            $newProductId = (int) $data['product_id'];
+            $newType      = $data['type'];
+            $newAmount    = (int) $data['amount'];
+
+            // Lock de productos implicados
+            $oldProduct = Product::lockForUpdate()->find($oldProductId);
+            $newProduct = Product::lockForUpdate()->find($newProductId);
+
+            if (!$newProduct) {
+                return back()->withInput()->withErrors(['product_id' => 'Producto inválido.']);
+            }
+
+            // 1) Revertir el efecto del movimiento anterior sobre el producto anterior
+            if ($oldProduct) {
+                if ($oldType === 'entrada') {
+                    // Se había SUMADO stock, ahora restamos
+                    if ($oldProduct->stock < $oldAmount) {
+                        return back()->withInput()->withErrors([
+                            'amount' => 'No se puede revertir la entrada previa (stock insuficiente en el producto original).'
+                        ]);
+                    }
+                    $oldProduct->decrement('stock', $oldAmount);
+                } else {
+                    // Se había RESTADO stock, ahora sumamos
+                    $oldProduct->increment('stock', $oldAmount);
+                }
+            }
+
+            // 2) Validar y aplicar el nuevo efecto al nuevo producto
+            if ($newType === 'salida' && $newAmount > $newProduct->stock) {
+                // Revertimos la reversión para no dejar inconsistencias si el mismo producto es el viejo
+                // (Caso distinto de producto ya quedó revertido correctamente arriba, no hay nada más que revertir)
+                // Como estamos en transacción, bastaría con devolver error y el rollback deja todo como estaba.
+                return back()->withInput()->withErrors([
+                    'amount' => 'Stock insuficiente en el producto seleccionado. Disponible: ' . $newProduct->stock
+                ]);
+            }
+
+            if ($newType === 'entrada') {
+                $newProduct->increment('stock', $newAmount);
+            } else {
+                $newProduct->decrement('stock', $newAmount);
+            }
+
+            // 3) Actualizar el movimiento
+            $movement->update($data);
+
+            return redirect()
+                ->route('movements.index')
+                ->with('success', 'Movimiento actualizado correctamente.');
+        });
+    }
+
+
+    /**
+     * Exportar a Excel respetando los filtros actuales
+     */
+    public function export(Request $request)
+    {
+        $filters = $request->only(['type', 'product_id', 'area', 'date_from', 'date_to']);
+        $filename = 'movimientos_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(new MovementsExport($filters), $filename);
+    }
+
+    /**
+     * Historial (JSON) de los últimos 5 movimientos de un producto
+     * Usado por la vista de crear para mostrar historial lateral
+     */
+    public function history(Product $product)
+    {
+        $items = Movement::where('product_id', $product->id)
+            ->orderByDesc('date_products')
+            ->orderByDesc('id')
+            ->take(5)
+            ->get(['id', 'type', 'amount', 'date_products', 'delivered_to', 'area', 'taken_by']);
+
+        return response()->json([
+            'product_id' => $product->id,
+            'history' => $items->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'type' => $m->type,
+                    'amount' => (int)$m->amount,
+                    'date' => optional($m->date_products)->format('Y-m-d'),
+                    'delivered_to' => $m->delivered_to,
+                    'area' => $m->area,
+                    'taken_by' => $m->taken_by,
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * (Opcional) Eliminar un movimiento revirtiendo el stock
+     */
+    public function destroy(Movement $movement)
+    {
+        return DB::transaction(function () use ($movement) {
+            $product = Product::lockForUpdate()->find($movement->product_id);
+
+            if ($product) {
+                // Revertir stock según el tipo del movimiento
+                if ($movement->type === 'entrada') {
+                    // Si borras una entrada, disminuye el stock
+                    $product->decrement('stock', (int)$movement->amount);
+                } else {
+                    // Si borras una salida, aumenta el stock
+                    $product->increment('stock', (int)$movement->amount);
+                }
+            }
+
+            $movement->delete();
+
+            return redirect()
+                ->back()
+                ->with('success', 'Movimiento eliminado y stock revertido.');
+        });
+    }
+
+    public function importForm()
+    {
+        return view('movimientos.import');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'], // 10MB
+            'dry_run' => ['nullable', 'boolean']
+        ]);
+
+        $dryRun = (bool) $request->boolean('dry_run');
+
+        // Ejecutar import y obtener resumen
+        $import = new MovementsImport($dryRun);
+        Excel::import($import, $request->file('file'));
+
+        $summary = $import->getSummary();
+
+        return redirect()
+            ->route('movements.import.form')
+            ->with('import_summary', $summary);
+    }
+
+    public function template()
+    {
+        $filename = 'plantilla_movimientos.xlsx';
+        return Excel::download(new MovementsTemplateExport, $filename);
     }
 }

@@ -1,255 +1,61 @@
-/* =========================================================
-   Movimientos – Estilo independiente (scope: .entry-form)
-   No afecta otras vistas fuera de .entry-form
-   ========================================================= */
-.entry-form{
-  /* Tokens locales (heredan de master si existen) */
-  --ef-blue:        var(--ny-blue-700, #004aad);
-  --ef-blue-600:    var(--ny-blue-600, #0a5bca);
-  --ef-blue-100:    var(--ny-blue-100, #e8f0fe);
-  --ef-red:         #d72638;
-  --ef-red-600:     #c31f2d;
-  --ef-black:       var(--ny-gray-700, #111);
-  --ef-gray-500:    var(--ny-gray-500, #555);
-  --ef-shadow-sm:   0 6px 18px rgba(0,0,0,.10);
-  --ef-shadow-md:   0 12px 28px rgba(0,0,0,.14);
-  --ef-glass-bg:    rgba(255,255,255,.22);   /* paneles */
-  --ef-glass-brd:   rgba(255,255,255,.32);
-  --ef-glass-ctrl:  rgba(255,255,255,.78);   /* inputs */
-  --ef-glass-ctrl2: rgba(255,255,255,.86);
+.mv-type {
+    display: flex;
+    gap: 0.6rem;
 }
 
-/* Migas */
-.entry-form .breadcrumb .breadcrumb-item a{
-  color: var(--ef-blue); text-decoration: none;
-}
-.entry-form .breadcrumb .breadcrumb-item a:hover{
-  text-decoration: underline;
-}
-
-/* =========================================================
-   PANELES GLASS (aplica a tus DIVs principales)
-   ========================================================= */
-.entry-form .entry-card,
-.entry-form .tips-card{
-  background: var(--ef-glass-bg);
-  border: 1px solid var(--ef-glass-brd);
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: var(--ef-shadow-sm);
-  overflow: hidden;
-  opacity: 0; transform: translateY(8px) scale(.995);
-  animation: efCardIn .45s cubic-bezier(.22,.61,.36,1) .04s forwards;
-}
-.entry-form .entry-card:hover,
-.entry-form .tips-card:hover{
-  transform: translateY(-2px);
-  box-shadow: var(--ef-shadow-md);
-}
-@keyframes efCardIn{
-  to{ opacity:1; transform: none; }
+.mv-type .pill {
+    user-select: none;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: 0.2s ease;
 }
 
-/* Encabezados de panel */
-.entry-form .card-header.brand{
-  background: linear-gradient(100deg, var(--ef-blue), var(--ef-red)) !important;
-  background-size: 200% 100%;
-  animation: efStripe 6s ease infinite;
-  color: #fff; border:0;
-}
-.entry-form .card-header.tips{
-  background: linear-gradient(90deg, var(--ef-blue), var(--ef-red-600));
-  color:#fff; border:0;
-}
-/* redondeo superior consistente cuando hay header */
-.entry-form .card-header.brand,
-.entry-form .card-header.tips{
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+.mv-type .pill.active {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
 }
 
-@keyframes efStripe{
-  0%,100%{ background-position: 0% 0; }
-  50%    { background-position: 100% 0; }
+.mv-type .pill input {
+    display: none;
 }
 
-/* =========================================================
-   CAMPOS / CONTROLES con look “glass”
-   ========================================================= */
-.entry-form .form-label{
-  font-weight: 700; color: var(--ef-black);
+.card {
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-/* Fondo translúcido en inputs/selects */
-.entry-form .form-control,
-.entry-form .form-select{
-  background: var(--ef-glass-ctrl);
-  border: 1px solid rgba(255,255,255,.55);
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
-}
-.entry-form .form-control::placeholder{ color:#9aa4b2; }
-
-.entry-form .form-control:focus,
-.entry-form .form-select:focus{
-  background: var(--ef-glass-ctrl2);
-  border-color: var(--ef-blue);
-  box-shadow: 0 0 0 .15rem rgba(10,91,202,.14);
+.card-header {
+    font-weight: 600;
+    font-size: 1.2rem;
 }
 
-/* Icono del input-group con realce al foco */
-.entry-form .input-group-text{
-  background: rgba(255,255,255,.6);
-  border-color: rgba(255,255,255,.55);
-  color: var(--ef-blue);
-  transition: color .2s ease, transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
-}
-.entry-form .input-group:focus-within .input-group-text{
-  color:#fff; background: var(--ef-blue); border-color: var(--ef-blue);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 18px rgba(0,0,0,.12);
-}
-/* aura suave del grupo */
-.entry-form .input-group:focus-within{ filter: drop-shadow(0 6px 14px rgba(0,0,0,.06)); }
-
-/* Hover leve en selects */
-.entry-form select.form-select:hover{ border-color: rgba(0,0,0,.15); }
-
-/* Texto auxiliar (unidad/stock/quedará) */
-.entry-form .form-text{ color: var(--ef-gray-500); }
-.entry-form .form-text strong{
-  display:inline-block; padding:.1rem .5rem; border-radius: 999px;
-  background: var(--ef-blue-100); color: var(--ef-black); font-weight: 800; letter-spacing:.2px;
+.form-label {
+    font-weight: 500;
 }
 
-/* Estados de "Quedará" + ping */
-.entry-form .will-ok{  background:#e9f6ff; color:#0b4d6d; }
-.entry-form .will-warn{ background:#fff4e6; color:#7a4b00; }
-.entry-form .ping{
-  animation: efPing .65s ease-out;
+.btn {
+    border-radius: 8px;
 }
-@keyframes efPing{
-  0%{   box-shadow:0 0 0 0 rgba(10,91,202,.28); transform:scale(1); }
-  80%{  box-shadow:0 0 0 .7rem rgba(10,91,202,0); transform:scale(1.02); }
-  100%{ box-shadow:none; transform:scale(1); }
+.table td,
+.table th {
+    vertical-align: middle;
 }
-
-/* =========================================================
-   ALERTAS
-   ========================================================= */
-.entry-form .alert-danger{
-  border-radius: 12px;
-  background: rgba(255,255,255,.85);
-  border: 1px solid rgba(255,0,0,.12);
-  backdrop-filter: blur(4px);
-  animation: efShake .28s ease-in-out;
+.badge {
+    font-size: 0.85rem;
+    padding: 0.4em 0.6em;
+    border-radius: 6px;
 }
-@keyframes efShake{
-  0%,100%{ transform: translateX(0); }
-  25%{ transform: translateX(-4px); }
-  50%{ transform: translateX(3px); }
-  75%{ transform: translateX(-2px); }
+.card {
+    border-radius: 12px;
+    overflow: hidden;
 }
-.entry-form .is-invalid{ animation: efFieldFlash .6s ease-out; }
-@keyframes efFieldFlash{
-  0%{ box-shadow: 0 0 0 .15rem rgba(215,38,56,.18); }
-  100%{ box-shadow: none; }
-}
-
-/* =========================================================
-   BOTONES
-   ========================================================= */
-.entry-form .btn-success{
-  background: var(--ef-blue); border-color: var(--ef-blue);
-  border-radius: 12px; font-weight: 700;
-  transition: transform .15s ease, box-shadow .2s ease, filter .15s ease;
-  position: relative; overflow: hidden;
-}
-.entry-form .btn-success:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(0,0,0,.14);
-  filter: saturate(1.05);
-}
-.entry-form .btn-success::after{
-  content:""; position:absolute; inset:0; transform: translateX(-120%) skewX(-20deg);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
-  transition: transform .6s ease;
-}
-.entry-form .btn-success:hover::after{ transform: translateX(120%) skewX(-20deg); }
-
-.entry-form .btn-outline-secondary{ border-radius: 12px; }
-
-/* Accesibilidad */
-.entry-form .btn:focus{
-  outline: 3px solid rgba(47,115,214,.25); outline-offset: 2px;
-}
-
-/* =========================================================
-   LISTAS DE TIPS (la que usas: .tips-list)
-   ========================================================= */
-.entry-form .tips-card .tips-list{ list-style:none; padding-left:0; margin:0; }
-.entry-form .tips-card .tips-list li{
-  position: relative; padding-left: 1.1rem; border-radius: 8px;
-  transition: background .2s ease, transform .2s ease;
-}
-.entry-form .tips-card .tips-list li::before{
-  content:""; position:absolute; left:.25rem; top:.6rem;
-  width:6px; height:6px; border-radius:999px; background: var(--ef-blue);
-  animation: efDot .9s ease-in-out infinite alternate;
-}
-@keyframes efDot{ to{ transform: scale(1.35); } }
-.entry-form .tips-card .tips-list li:hover{
-  background: rgba(255,255,255,.28); /* mini glass */
-  backdrop-filter: blur(3px);
-  transform: translateX(2px);
-}
-
-/* =========================================================
-   TRANSICIONES DE LAYOUT (abrir/cerrar tips en desktop)
-   ========================================================= */
-.entry-form #tipsCol,
-.entry-form #formCol{ transition: all .25s ease; }
-
-/* Botón flotante para reabrir Tips (solo desktop) */
-.entry-form .tips-fab{
-  position: sticky; top: 1rem; align-self: flex-start; margin-left: auto; z-index: 3;
-  width: 44px; height: 44px; border-radius: 50%;
-  display: grid; place-items: center; border: 0;
-  box-shadow: 0 8px 20px rgba(0,0,0,.15);
-  color:#fff; background: linear-gradient(135deg, var(--ef-red), var(--ef-blue));
-}
-.entry-form .tips-fab:hover{ filter: brightness(1.06); }
-
-/* Botón cerrar tips */
-.entry-form .tips-close{
-  background: rgba(255,255,255,.15); border:0; padding:.25rem .5rem; line-height:1; border-radius:8px;
-}
-.entry-form .tips-close:hover{ background: rgba(255,255,255,.25); }
-
-/* Oculta el FAB en móviles (stack natural) */
-@media (max-width: 991.98px){
-  .entry-form .tips-fab{ display:none !important; }
-}
-
-/* =========================================================
-   EFECTO RIPPLE (ligero)
-   ========================================================= */
-.entry-form .ripple-host{ position:relative; overflow:hidden; }
-.entry-form .ripple{
-  position:absolute; border-radius:50%; width:10px; height:10px; pointer-events:none; opacity:.6;
-  background: radial-gradient(closest-side, rgba(0,0,0,.18), rgba(0,0,0,0));
-  transform: translate(-50%,-50%) scale(0);
-  animation: efRipple .6s ease-out forwards;
-}
-@keyframes efRipple{ to{ transform: translate(-50%,-50%) scale(18); opacity:0; } }
-
-/* =========================================================
-   REDUCE MOTION
-   ========================================================= */
-@media (prefers-reduced-motion: reduce){
-  .entry-form *{
-    animation-duration:.01ms !important;
-    animation-iteration-count:1 !important;
-    transition-duration:.01ms !important;
-  }
+.card-header {
+    font-weight: 600;
+    font-size: 1.1rem;
 }

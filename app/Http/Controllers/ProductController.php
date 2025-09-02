@@ -56,13 +56,21 @@ class ProductController extends Controller
         if (!is_numeric($code) || (int)$code < 1) {
             return response()->json(['exists' => false, 'valid' => false]);
         }
-        $exists = \App\Models\Product::where('code', (int)$code)->exists();
+        $exists = Product::where('code', (int)$code)->exists();
         return response()->json(['exists' => $exists, 'valid' => true]);
+    }
+
+    // NUEVA: servicio para obtener el siguiente código (en tiempo real)
+    public function nextCode()
+    {
+        $next = ((int) Product::max('code')) + 1;
+        return response()->json(['next' => $next]);
     }
 
     public function create()
     {
-        return view('productos.productos');
+        $nextCode = ((int) Product::max('code')) + 1;  // sugerencia inicial
+        return view('productos.productos', compact('nextCode'));
     }
 
     public function store(Request $request)
@@ -103,6 +111,6 @@ class ProductController extends Controller
         Product::create($validated);
 
         // Redirigir (ajusta la ruta según tu listado)
-        return redirect()->route('products.index')->with('success', 'Producto Agregado correctamente.');
+        return redirect()->route('products.create')->with('success', 'Producto Agregado correctamente.');
     }
 }

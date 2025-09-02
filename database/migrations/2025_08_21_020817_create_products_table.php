@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('stock');
             $table->string('categories');
             $table->string('extent'); //medida
-            $table->string('warehouse')->nullable(); //almacén 
+            $table->string('warehouse')->nullable(); //almacén
             $table->date('date_products'); //Fecha que se añadió el producto al Stock
             $table->timestamps();
         });

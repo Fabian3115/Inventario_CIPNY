@@ -15,10 +15,14 @@ class WelcomeController extends Controller
         $hoy  = Carbon::today();        // respeta timezone app
         $from = Carbon::today()->subDays(30);
 
+        // =========================
+        // KPIs
+        // =========================
+
         // Total de productos
         $products_total = Product::count();
 
-        // Entradas / Salidas últimos 30 días
+        // Entradas / Salidas últimos 30 días (ajusta a whereDate si tu columna es DATE)
         $ins_30d = Movement::where('type', 'entrada')
             ->whereBetween('date_products', [$from, $hoy])
             ->sum('amount');
@@ -27,9 +31,9 @@ class WelcomeController extends Controller
             ->whereBetween('date_products', [$from, $hoy])
             ->sum('amount');
 
-        // Stock bajo:
+        // Stock bajo para KPI:
         // - Si existe columna min_stock: stock <= min_stock
-        // - Si no, usa un umbral global por defecto (p. ej. 10)
+        // - Si no, usa umbral global (config/inventory.php -> low_stock_threshold)
         $defaultThreshold = config('inventory.low_stock_threshold', 10);
 
         $low_stock = Product::when(
@@ -40,18 +44,27 @@ class WelcomeController extends Controller
 
         $stats = compact('products_total', 'ins_30d', 'outs_30d', 'low_stock');
 
-        $defaultThreshold = config('inventory.low_stock_threshold', 10);
+        // =========================
+        // Datos para el modal “Reposición”
+        // (requisito: mostrar < 2 y = 0)
+        // =========================
 
-        $out_of_stock = Product::select('id', 'code', 'description', 'stock')
-            ->when(
-                Schema::hasColumn('products', 'min_stock'),
-                fn($q) => $q->whereColumn('stock', '<=', 'min_stock'),
-                fn($q) => $q->where('stock', '<=', $defaultThreshold)
-            )
-            ->orderBy('stock')
-            ->limit(200) // por si hay muchos
-            ->get();
+        // AGOTADOS: stock <= 0
+        $agotados = Product::select('id', 'code', 'description', 'stock', 'warehouse') // o 'warehouse'
+            ->where('stock', '<=', 0)->orderBy('code')->limit(200)->get();
 
-        return view('welcome', compact('stats', 'out_of_stock'));
+        // BAJO STOCK 2: 0 < stock < 3
+        $bajo_stock_2 = Product::select('id', 'code', 'description', 'stock', 'warehouse') // o 'warehouse'
+            ->where('stock', '>', 0)->where('stock', '<',3)
+            ->orderBy('stock')->orderBy('code')->limit(200)->get();
+        // También puedes mantener tu colección original (opcional):
+        // $out_of_stock = $agotados->concat($bajo_stock_2);
+
+        return view('welcome', [
+            'stats'         => $stats,
+            // 'out_of_stock' => $out_of_stock, // opcional si aún lo usas en otros lugares
+            'agotados'      => $agotados,
+            'bajo_stock_2'  => $bajo_stock_2,
+        ]);
     }
 }

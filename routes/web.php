@@ -13,20 +13,31 @@ Route::get('products',   [ProductController::class, 'index'])->name('products.in
 Route::get('products/create', [ProductController::class, 'create'])->name('products.create');
 Route::post('products/store',  [ProductController::class, 'store'])->name('products.store');
 
-
 Route::get('/products/check-code', [ProductController::class, 'checkCode'])->name('products.checkCode');
+// NUEVA: entrega el siguiente código sugerido (max(code) + 1)
+Route::get('products/next-code', [ProductController::class, 'nextCode'])->name('products.nextCode');
 
 //Movimientos
-//ENTRADA
-Route::get('/movements/in/lista', [MovementController::class, 'index_entrada'])->name('movements.in.index');
-Route::get('/movements/in/create', [MovementController::class, 'create_entrada'])->name('movements.in.create');
-Route::post('/movements/in',        [MovementController::class, 'store_entrada'])->name('movements.in.store');
+//Crear Movimiento
+Route::get('movements', [MovementController::class, 'index'])->name('movements.index');
+Route::get('movements/create', [MovementController::class, 'create'])->name('movements.create');
+Route::post('movements', [MovementController::class, 'store'])->name('movements.store');
 
-//SALIDA
-Route::get('/movements/out/lista', [MovementController::class, 'index_salida'])->name('movements.out.index');
-Route::get('/movements/out/create', [MovementController::class, 'create_salida'])->name('movements.out.create');
-Route::post('/movements/out',    [MovementController::class, 'store_salida'])->name('movements.out.store');
+//Editar Movimiento
+Route::get('movements/{movement}/edit', [MovementController::class, 'edit'])->name('movements.edit');
+Route::put('movements/{movement}', [MovementController::class, 'update'])->name('movements.update');
 
-//EXPOTACION DE EXCEL
-Route::get('/movements/in/export', [MovementController::class, 'ExportEntrada'])->name('movements.in.export'); //Entrada
-Route::get('/movements/out/export', [MovementController::class, 'ExportSalida'])->name('movements.out.export'); //Salida
+//Exportar Movimiento
+Route::get('movements/export', [MovementController::class, 'export'])->name('movements.export');
+
+//Importar Movimiento
+Route::get('movements/import', [MovementController::class, 'importForm'])->name('movements.import.form');
+Route::post('movements/import', [MovementController::class, 'import'])->name('movements.import');
+Route::get('movements/template', [MovementController::class, 'template'])->name('movements.template');
+
+//Historial de Movimientos
+Route::get('movements/history/{product}', [MovementController::class, 'history'])
+    ->name('movements.history');
+
+//Eliminar Movimiento
+Route::delete('movements/{movement}', [MovementController::class, 'destroy'])->name('movements.destroy');
