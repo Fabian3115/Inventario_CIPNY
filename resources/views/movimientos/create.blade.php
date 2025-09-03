@@ -76,12 +76,13 @@
                                         value="{{ now()->format('Y-m-d') }}" required>
                                 </div>
 
-                                {{-- REQUISICIÓN (opcional) --}}
-                                <div class="col-md-6">
+                                {{-- REQUISICIÓN (solo ENTRADA) --}}
+                                <div class="col-md-6" id="requisition-wrap">
                                     <label class="form-label">Requisición</label>
                                     <input type="text" name="requisition" id="requisition" class="form-control"
                                         placeholder="N° requisición / soporte (opcional)">
                                 </div>
+
 
                                 {{-- TIPO (píldoras) --}}
                                 <div class="col-12">
@@ -270,6 +271,9 @@
             const piCat = document.getElementById('pi-cat');
             const piWh = document.getElementById('pi-wh');
             const piHistory = document.getElementById('pi-history');
+            const requisitionInput = document.getElementById('requisition');
+            const requisitionWrap = document.getElementById('requisition-wrap');
+
 
             function getSelectedData() {
                 const opt = selProduct.options[selProduct.selectedIndex];
@@ -292,6 +296,8 @@
 
             function updatePills() {
                 const isSalida = radioSalida.checked;
+
+                // Píldoras y extra de salida
                 pillEntrada.classList.toggle('active', !isSalida);
                 pillSalida.classList.toggle('active', isSalida);
                 extraSalida.style.display = isSalida ? '' : 'none';
@@ -303,8 +309,24 @@
                     if (area) area.value = '';
                     if (takenBy) takenBy.value = '';
                 }
+
+                // === Requisición: SOLO en ENTRADA ===
+                if (requisitionWrap && requisitionInput) {
+                    if (isSalida) {
+                        requisitionWrap.style.display = 'none';
+                        requisitionInput.disabled = true; // no se envía al backend
+                        requisitionInput.value = ''; // opcional: limpiar al ocultar
+                    } else {
+                        requisitionWrap.style.display = '';
+                        requisitionInput.disabled = false;
+                        // Si quieres que sea obligatorio en ENTRADA, descomenta la línea:
+                        // requisitionInput.setAttribute('required', 'required');
+                    }
+                }
+
                 updateComputed();
             }
+
 
             function renderHistory(list) {
                 if (!Array.isArray(list) || list.length === 0) {
