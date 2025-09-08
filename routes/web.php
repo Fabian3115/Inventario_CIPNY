@@ -3,6 +3,9 @@
 use App\Http\Controllers\MovementController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\ComputationController;
+use App\Http\Controllers\ComputedMovementController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WelcomeController::class, '__invoke'])->name('welcome');
@@ -41,3 +44,24 @@ Route::get('movements/history/{product}', [MovementController::class, 'history']
 
 //Eliminar Movimiento
 Route::delete('movements/{movement}', [MovementController::class, 'destroy'])->name('movements.destroy');
+
+
+
+
+// Computations (equipos)
+// Opción A: rutas sueltas
+Route::get('computations/create', [ComputationController::class, 'create'])->name('computations.create');
+Route::post('computations',        [ComputationController::class, 'store'])->name('computations.store');
+
+
+Route::get('computations/{computation}/edit', [ComputationController::class, 'edit'])->name('computations.edit');
+Route::put('computations/{computation}', [ComputationController::class, 'update'])->name('computations.update');
+
+// Computed Movements (movimientos de equipo)
+Route::get('computed_movements/create', [ComputedMovementController::class, 'create'])->name('computed_movements.create');
+Route::post('computed_movements',        [ComputedMovementController::class, 'store'])->name('computed_movements.store');
+Route::get('computed_movements/{movement}/edit', [ComputedMovementController::class, 'edit'])->name('computed_movements.edit');
+Route::put('computed_movements/{movement}', [ComputedMovementController::class, 'update'])->name('computed_movements.update');
+
+Route::get('computations', [ComputationController::class, 'index'])->name('computations.index');
+Route::get('computed_movements', [ComputedMovementController::class, 'index'])->name('computed_movements.index');

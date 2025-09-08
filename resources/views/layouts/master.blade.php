@@ -85,8 +85,40 @@
                     <div class="ny-submenu" id="subIn" role="menu" aria-label="Entradas">
                         <a class="ny-subpill" href="{{ route('movements.create') }}"><i class="bi bi-plus-lg"></i>
                             Registrar</a>
-                        <a class="ny-subpill" href="{{ route('movements.index') }}"><i
-                                class="bi bi-clock-history"></i> Historial</a>
+                        <a class="ny-subpill" href="{{ route('movements.index') }}"><i class="bi bi-clock-history"></i>
+                            Historial</a>
+                    </div>
+                </div>
+
+                {{-- ================= NUEVO: Equipos ================= --}}
+                <div class="ny-item" data-sub="subComputations">
+                    <button class="ny-mainbtn" type="button">
+                        <i class="bi bi-pc-display-horizontal"></i><span>Equipos</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </button>
+                    <div class="ny-submenu" id="subComputations" role="menu" aria-label="Equipos">
+                        <a class="ny-subpill" href="{{ route('computations.create') }}">
+                            <i class="bi bi-plus-circle"></i> Crear
+                        </a>
+                        <a class="ny-subpill" href="{{ route('computations.index') }}">
+                            <i class="bi bi-list-ul"></i> Lista
+                        </a>
+                    </div>
+                </div>
+
+                {{-- ============== NUEVO: Movimientos de Equipo ============== --}}
+                <div class="ny-item" data-sub="subComputedMovs">
+                    <button class="ny-mainbtn" type="button">
+                        <i class="bi bi-arrow-left-right"></i><span>Mov. Equipos</span>
+                        <i class="bi bi-chevron-down chevron"></i>
+                    </button>
+                    <div class="ny-submenu" id="subComputedMovs" role="menu" aria-label="Movimientos de Equipo">
+                        <a class="ny-subpill" href="{{ route('computed_movements.create') }}">
+                            <i class="bi bi-plus-lg"></i> Registrar
+                        </a>
+                        <a class="ny-subpill" href="{{ route('computed_movements.index') }}">
+                            <i class="bi bi-clock-history"></i> Historial
+                        </a>
                     </div>
                 </div>
 

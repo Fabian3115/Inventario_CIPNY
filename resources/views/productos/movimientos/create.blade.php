@@ -39,12 +39,12 @@
                                 '----',
                             ];
                             $takenByList = $takenByList ?? [
-                                'Yuderly Chabarro',
+                                'Yuderly Chavarro',
                                 'Yuli Hernandez',
                                 'Diego Salazar',
                                 'Kevin Murcia',
                                 'Fabian Torres',
-                                'Kevin Arranque',
+                                'Kevin Aranque',
                                 '----',
                             ];
                         @endphp
@@ -80,7 +80,7 @@
                                 <div class="col-md-6" id="requisition-wrap">
                                     <label class="form-label">Requisición</label>
                                     <input type="text" name="requisition" id="requisition" class="form-control"
-                                        placeholder="N° requisición / soporte (opcional)">
+                                        placeholder="N° requisición / soporte (obligatorio)">
                                 </div>
 
 

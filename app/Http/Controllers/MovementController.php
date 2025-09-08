@@ -32,7 +32,7 @@ class MovementController extends Controller
 
         $movements = $query->paginate(10)->appends($request->query());
 
-        return view('movimientos.index', compact('movements', 'products'));
+        return view('productos.movimientos.index', compact('movements', 'products'));
     }
 
     /**
@@ -51,7 +51,7 @@ class MovementController extends Controller
             'warehouse'
         ]);
 
-        return view('movimientos.create', compact('products'));
+        return view('productos.movimientos.create', compact('products'));
     }
 
     /**
@@ -116,7 +116,7 @@ class MovementController extends Controller
         $areas = ['Bodega A', 'Bodega B', 'Mantenimiento', 'Producción', 'Sistemas', 'Administración'];
         $takenByList = ['Juan Pérez', 'Ana Gómez', 'Carlos Ruiz', 'María López', 'Invitado'];
 
-        return view('movimientos.edit', compact('movement', 'products', 'areas', 'takenByList'));
+        return view('productos.movimientos.edit', compact('movement', 'products', 'areas', 'takenByList'));
     }
 
     public function update(Request $request, Movement $movement)
@@ -268,7 +268,7 @@ class MovementController extends Controller
 
     public function importForm()
     {
-        return view('movimientos.import');
+        return view('productos.movimientos.import');
     }
 
     public function import(Request $request)
